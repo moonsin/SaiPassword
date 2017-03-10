@@ -6,11 +6,11 @@ import {
     Text
 } from 'react-native';
 
-var {LoginScreen} = require('./login/LoginScreen');
+var {LoginNav} = require('./login/LoginScreen');
 
 class setup extends Component {
     render() {
-        return ( < LoginScreen / > )
+        return ( < LoginNav / > )
     }
 }
 

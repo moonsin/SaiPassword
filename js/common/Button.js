@@ -23,9 +23,9 @@ const styles = StyleSheet.create({
 
 export default class NormalButton extends React.Component {
 	render() {
-        const{text,backgroundColor}=this.props;
+        const{text,backgroundColor,onpress}=this.props;
 		return (
-                <TouchableOpacity style={[styles.Button,{backgroundColor:backgroundColor}]}>
+                <TouchableOpacity style={[styles.Button,{backgroundColor:backgroundColor}]} onPress={onpress}>
                     <Text style={styles.ButtonText}>{text}</Text>
                 </TouchableOpacity>
     	)

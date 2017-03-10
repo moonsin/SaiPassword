@@ -2,6 +2,7 @@ import React, {
 	Component
 } from 'react';
 import {
+	Navigator,
 	TouchableOpacity,
 	Button,
 	Image,
@@ -11,6 +12,7 @@ import {
 } from 'react-native';
 
 import NormalButton from '../common/Button';
+import {SignUpPage} from'../signup/SignUp'; 
 
 const styles = StyleSheet.create({
 	LoginCenter: {
@@ -23,6 +25,8 @@ const styles = StyleSheet.create({
 	},
 });
 
+
+
 class PasswordInput extends React.Component {
 	render() {
 		return (
@@ -34,7 +38,7 @@ class PasswordInput extends React.Component {
 	}
 }
 
-export class LoginScreen extends React.Component {
+class LoginScreen extends React.Component {
 	render() {
 		return (
 			<View style={{backgroundColor: '#ececec', flex: 1,}}>
@@ -44,11 +48,16 @@ export class LoginScreen extends React.Component {
                 <View style={styles.LoginCenter}>
                     <Image source={require('../common/img/logo-mark.png')} />
                 </View>
+                {/*
                 <View style={[styles.LoginCenter,styles.LoginCenterTop]}>
                     <PasswordInput />
                 </View>
+               */}
                 <View style={[styles.LoginCenter,{marginTop:20}]}>
                    <NormalButton text='sign in' backgroundColor='#525252' />
+                </View>
+                <View style={[styles.LoginCenter,{marginTop:20}]} onPress={()=>this._navigate('signUp')}>
+                   <NormalButton text='sign up' backgroundColor='#2EBB4E' onpress={()=>{this.props.navigator.push(routes[1]);}}  />
                 </View>
                 {/*
                 <View style={[styles.LoginCenter,{marginTop:20}]}>
@@ -56,8 +65,8 @@ export class LoginScreen extends React.Component {
                 </View>
                 */}
 				<View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>
-               <Button
-				  onPress={()=>alert(123)}
+              <Button
+				  onPress={()=>alert("那也是没有办法的事")}
 				  title="Forgot password?"
 				  color="#515151"
 				  accessibilityLabel="Learn more about this purple button"/> 
@@ -66,3 +75,28 @@ export class LoginScreen extends React.Component {
 		)
 	}
 }
+
+export class LoginNav extends React.Component {
+	render() {
+		return (<Navigator
+      initialRoute={routes[0]}
+      renderScene={(route, navigator) =>{
+		  let Component = route.component;
+		return <Component  navigator={navigator} />
+		}
+	}
+	/>
+)
+}}
+
+
+const routes = [{
+		name: 'LoginScreen',
+		index: 0,
+		component: LoginScreen
+	},
+	{
+		name: 'SignUp',
+		index: 1,
+		component: SignUpPage
+	}];
