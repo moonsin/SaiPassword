@@ -4,8 +4,7 @@ import {
 import {
     LoginScreen
 } from '../login/LoginScreen';
-
-export default [{
+const routes = [{
         name: 'LoginScreen',
         index: 0,
         component: LoginScreen
@@ -15,4 +14,5 @@ export default [{
         index: 1,
         component: SignUpPage
     }
-] 
+] ;
+export default routes; 
