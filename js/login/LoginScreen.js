@@ -1,47 +1,47 @@
 import React, {
-	Component
+    Component
 } from 'react';
 import {
-	Navigator,
-	TouchableOpacity,
-	Button,
-	Image,
-	View,
-	Text,
-	StyleSheet
+    Navigator,
+    TouchableOpacity,
+    Button,
+    Image,
+    View,
+    Text,
+    StyleSheet
 } from 'react-native';
 
 import NormalButton from '../common/Button';
-import {SignUpPage} from'../signup/SignUp'; 
+import routes from '../router/Router';
 
 const styles = StyleSheet.create({
-	LoginCenter: {
-		marginTop: 50,
-		flexDirection: 'row',
-		justifyContent: 'center'
-	},
-	LoginCenterTop: {
-		marginTop: 32,
-	},
+    LoginCenter: {
+        marginTop: 50,
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    LoginCenterTop: {
+        marginTop: 32,
+    },
 });
 
 
 
 class PasswordInput extends React.Component {
-	render() {
-		return (
-			<Image source={require('../common/img/txt-input-copy.png')}>
+    render() {
+        return (
+            <Image source={require('../common/img/txt-input-copy.png')}>
             <Image source={require('../common/img/lock-icon.png')} style={{marginLeft:10,marginTop:8}}></Image>
             {/*<Text style={{textAlign:'center',backgroundColor:'#515151'}}>Inside</Text>*/}
             </Image>
-		)
-	}
+        )
+    }
 }
 
-class LoginScreen extends React.Component {
-	render() {
-		return (
-			<View style={{backgroundColor: '#ececec', flex: 1,}}>
+export class LoginScreen extends React.Component {
+    render() {
+        return (
+            <View style={{backgroundColor: '#ececec', flex: 1,}}>
                 <View style={styles.LoginCenter}>
                        <Text style={{color:'#515151', fontSize: 20}}>Welcome to SaiPassword</Text>
                 </View>
@@ -72,31 +72,6 @@ class LoginScreen extends React.Component {
 				  accessibilityLabel="Learn more about this purple button"/> 
 				</View>
             </View>
-		)
-	}
+        )
+    }
 }
-
-export class LoginNav extends React.Component {
-	render() {
-		return (<Navigator
-      initialRoute={routes[0]}
-      renderScene={(route, navigator) =>{
-		  let Component = route.component;
-		return <Component  navigator={navigator} />
-		}
-	}
-	/>
-)
-}}
-
-
-const routes = [{
-		name: 'LoginScreen',
-		index: 0,
-		component: LoginScreen
-	},
-	{
-		name: 'SignUp',
-		index: 1,
-		component: SignUpPage
-	}];

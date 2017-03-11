@@ -36,7 +36,7 @@ export class SignUpPage extends React.Component {
 			var value = this.refs.form.getValue();
 			if (value) { // if validation fails, value will be null
 				console.log(value); // value here is an instance of Person
-				fetch('http://127.0.0.1:8080/signup/', {
+				fetch('http://210.41.100.18:8080/signup', {
 					method: 'POST',
 					headers: {
 						'Accept': 'application/json',
