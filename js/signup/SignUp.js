@@ -10,6 +10,7 @@ import {
 	StyleSheet
 } from 'react-native';
 
+import routes from '../router/Router';
 import NormalButton from '../common/Button';
 var t = require('tcomb-form-native');
 var Form = t.form.Form;
@@ -21,46 +22,91 @@ var User = t.struct({
 var options = {
 	fields: {
 		password: {
-			secureTextEntry: true
+			secureTextEntry: true,
+			label: 'password',
+			error: 'Insert a valid password',
 		},
 		email: {
 			// you can use strings or JSX
-			error: 'Insert a valid email'
-		}
+			error: 'Insert a valid email',
+		},
+		userId: {
+			label: 'user name',
+			error: 'Insert a valid user name',
+		},
 	}
 }; // optional rendering options (see documentation)
 
 export class SignUpPage extends React.Component {
-	render() {
-		function as() {
-			var value = this.refs.form.getValue();
-			if (value) { // if validation fails, value will be null
-				console.log(value); // value here is an instance of Person
-				fetch('http://210.41.100.18:8080/signup', {
-					method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(value)
-				})
-			}
+
+	constructor(props) {
+		super(props);
+		this.name = '123';
+		this.state = {
+			options: options,
+			value: null
+		};
+	}
+
+	submit() {
+		var value = this.refs.form.getValue();
+		var getBack = this.props.navigator.pop;
+
+		if (value) { // if validation fails, value will be null
+			fetch('http://210.41.100.18:8080/signup', {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(value)
+			}).then((res) => {
+				return res.json();
+			}).then((data) => {
+				var userExist = data.userExist
+				if (!userExist) {
+					alert('用户创建成功');
+					getBack();
+				} else {
+					var options = t.update(this.state.options, {
+						fields: {
+							userId: {
+								error: {
+									'$set': 'Login has already existed'
+								},
+								hasError: {
+									'$set': true
+								}
+							}
+						}
+					});
+					this.setState({
+						options: options,
+						value: value
+					});
+				}
+			});
 		}
+	}
+
+	render() {
 		return (
 			<View style={styles.container}>
         {/* display */}
         <Form
           ref="form"
           type={User}
-          options={options}
+          options={this.state.options}
+ 		  value={this.state.value}
         />
-        <TouchableHighlight style={styles.button} onPress={as.bind(this)} underlayColor='#99d9f4'>
+        <TouchableHighlight style={styles.button} onPress={this.submit.bind(this)} underlayColor='#99d9f4'>
           <Text style={styles.buttonText}>Save</Text>
         </TouchableHighlight>
       </View>
 		);
 	}
 }
+
 var styles = StyleSheet.create({
 	container: {
 		justifyContent: 'center',
