@@ -2,6 +2,7 @@ import React, {
 	Component
 } from 'react';
 import {
+	ScrollView,
 	DeviceEventEmitter,
 	TouchableHighlight,
 	TouchableOpacity,
@@ -43,10 +44,13 @@ var options = {
 		},
 		email: {
 			error: 'Insert a valid email',
+			keyboardType: 'email-address',
+			//onFocus: function(){console.log(this.state)},
 		},
 		userId: {
 			label: 'user name',
 			error: 'Insert a valid user name',
+			keyboardType: 'default',
 		},
 	}
 }; // optional rendering options (see documentation)
@@ -116,8 +120,6 @@ export class SignUpPage extends React.Component {
 								'$set': passConfirmErr
 							}
 						},
-
-
 					}
 				});
 				this.setState({
@@ -181,17 +183,18 @@ export class SignUpPage extends React.Component {
 	render() {
 		return (
 			<View style={styles.container}>
-        {/* display */}
-        <Form
-          ref="form"
-          type={User}
-          options={this.state.options}
- 		  value={this.state.value}
-        />
-        <TouchableHighlight style={styles.button} onPress={this.submit.bind(this)} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableHighlight>
-      </View>
+			<ScrollView keyboardDismissMode={'interactive'} >
+				  <Form
+				  ref="form"
+				  type={User}
+				  options={this.state.options}
+				  value={this.state.value}
+				/>
+				<TouchableHighlight style={styles.button} onPress={this.submit.bind(this)} underlayColor='#99d9f4'>
+				  <Text style={styles.buttonText}>Save</Text>
+				</TouchableHighlight>
+			</ScrollView>
+     	   </View>
 		);
 	}
 }
@@ -221,6 +224,7 @@ var styles = StyleSheet.create({
 		borderRadius: 8,
 		marginBottom: 10,
 		alignSelf: 'stretch',
-		justifyContent: 'center'
+		justifyContent: 'center',
+		marginBottom:200,
 	}
 });
