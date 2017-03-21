@@ -54,11 +54,54 @@ export class SignUpPage extends React.Component {
 			value: null
 		};
 	}
-
 	submit() {
 		var value = this.refs.form.getValue();
 		var getBack = this.props.navigator.pop;
-		if (value) { // if validation fails, value will be null
+
+		function testPasswordStrength(password) {
+			if (password.length <= 7) {
+				return 'password length must be over 8 numbers or letters';
+			}
+			return false;
+		}
+
+		function testEmailFormat(email) {
+			var emailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+			if (!emailReg.test(email)) {
+				return 'input correct email';
+			}
+			return false;
+		}
+		if (value) {
+			let passwordErr = testPasswordStrength(value.password);
+			let emailErr = testEmailFormat(value.email);
+			if (passwordErr || emailErr) {
+				var options = t.update(this.state.options, {
+					fields: {
+						password: {
+							error: {
+								'$set': passwordErr
+							},
+							hasError: {
+								'$set': passwordErr
+							}
+						},
+						email: {
+							error: {
+								'$set': emailErr
+							},
+							hasError: {
+								'$set': emailErr
+							}
+						}
+					}
+				});
+				this.setState({
+					options: options,
+					value: value
+				});
+				return;
+			}
 			var updata = {
 				password: CryptoJS.AES.encrypt(value.password, value.key).toString(),
 				userId: value.userId,
@@ -85,9 +128,6 @@ export class SignUpPage extends React.Component {
 							userid: value.userId,
 							passwordSHA256: CryptoJS.SHA256(value.password).toString(),
 						},
-
-						// 如果不指定过期时间，则会使用defaultExpires参数
-						// 如果设为null，则永不过期
 						expires: null
 					});
 					DeviceEventEmitter.emit('setLoginStateTrue');

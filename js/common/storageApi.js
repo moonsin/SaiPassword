@@ -4,9 +4,9 @@ export function rendeState() {
     storage.load({
         key: 'loginState',
     }).then(ret => {
-        /*storage.remove({
+        storage.remove({
             key: 'loginState'  
-        })*/
+        })
         this.setState({
             ifLogin: !!ret.userid
         })
