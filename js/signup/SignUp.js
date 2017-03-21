@@ -19,6 +19,7 @@ var Form = t.form.Form;
 var User = t.struct({
 	userId: t.String,
 	password: t.String, // an optional string
+	passwordConfirm: t.String,
 	key: t.String,
 	email: t.String,
 });
@@ -29,6 +30,11 @@ var options = {
 			secureTextEntry: true,
 			label: 'password',
 			error: 'Insert a valid password',
+		},
+		passwordConfirm: {
+			secureTextEntry: true,
+			label: 'confirm your password',
+			error: 'Insert your password again',
 		},
 		key: {
 			secureTextEntry: true,
@@ -65,6 +71,13 @@ export class SignUpPage extends React.Component {
 			return false;
 		}
 
+		function testPasswordConfirm(password, passConfirm) {
+			if (passConfirm != password) {
+				return 'The passwords you entered must be the same';
+			}
+			return false;
+		}
+
 		function testEmailFormat(email) {
 			var emailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
 			if (!emailReg.test(email)) {
@@ -75,7 +88,8 @@ export class SignUpPage extends React.Component {
 		if (value) {
 			let passwordErr = testPasswordStrength(value.password);
 			let emailErr = testEmailFormat(value.email);
-			if (passwordErr || emailErr) {
+			let passConfirmErr = testPasswordConfirm(value.password, value.passwordConfirm);
+			if (passwordErr || emailErr || passConfirmErr) {
 				var options = t.update(this.state.options, {
 					fields: {
 						password: {
@@ -93,7 +107,17 @@ export class SignUpPage extends React.Component {
 							hasError: {
 								'$set': emailErr
 							}
-						}
+						},
+						passwordConfirm: {
+							error: {
+								'$set': passConfirmErr
+							},
+							hasError: {
+								'$set': passConfirmErr
+							}
+						},
+
+
 					}
 				});
 				this.setState({
