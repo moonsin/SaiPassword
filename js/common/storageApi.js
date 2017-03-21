@@ -4,9 +4,9 @@ export function rendeState() {
     storage.load({
         key: 'loginState',
     }).then(ret => {
-        storage.remove({
-            key: 'loginState'  
-        })
+        //storage.remove({
+          //  key: 'loginState'  
+        //})
 
         this.setState({
             ifLogin: !!ret.userid
@@ -47,8 +47,14 @@ export function getLocalPassword(localPassword) {
     
     var getStorageByPassword = async function() {
         var ret = await readStorageByLoginState();
-        return ret.passwordSHA256;
+        return ret;
     }
     return getStorageByPassword();
 
+}
+
+export function clearLoginState(localPassword) {
+    storage.remove({
+        key:'loginState',
+    })
 }

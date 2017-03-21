@@ -1,72 +1,81 @@
 import React, {
-    Component
+	Component
 } from 'react';
 import {
-    DeviceEventEmitter,
-    TextInput,
-    Navigator,
-    TouchableOpacity,
-    Button,
-    Image,
-    View,
-    Text,
-    StyleSheet
+	DeviceEventEmitter,
+	TextInput,
+	Navigator,
+	TouchableOpacity,
+	Button,
+	Image,
+	View,
+	Text,
+	StyleSheet
 } from 'react-native';
 
 import NormalButton from '../common/Button';
 import routes from '../router/Router';
 import {
-    rendeState,
-    getLocalPassword,
+	rendeState,
+	getLocalPassword,
+    clearLoginState,
 } from '../common/storageApi';
 var CryptoJS = require("crypto-js");
 const styles = StyleSheet.create({
-    LoginCenter: {
-        marginTop: 50,
-        flexDirection: 'row',
-        justifyContent: 'center'
-    },
-    LoginCenterTop: {
-        marginTop: 32,
-    },
+	LoginCenter: {
+		marginTop: 50,
+		flexDirection: 'row',
+		justifyContent: 'center'
+	},
+	LoginCenterTop: {
+		marginTop: 32,
+	},
 });
 export class LoginScreen extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            ifLogin: null,
-            passwordInput: null,
-        };
-    }
-    componentWillUnmount() {
-        this.subscription.remove();
-    };
-    componentWillMount() {
-        var rendeByState = rendeState.bind(this);
-        rendeByState();
-    }
-    componentDidMount() {
-        this.subscription = DeviceEventEmitter.addListener('setLoginStateTrue', () => this.setState({
-            ifLogin: true
-        }));
-    }
-    signIn() {
-        getLocalPassword().then((result) => {
-            if(CryptoJS.SHA256(this.state.passwordInput).toString() == result){
-                alert ('true');
-            }
-            else{
-                alert('false');
-            }
-        });
-    }
-    render() {
-        if (this.state.ifLogin == null) {
-            return (<View style={{backgroundColor: '#ececec', flex: 1,}}>
+	constructor(props) {
+		super(props);
+		this.state = {
+			ifLogin: null,
+			passwordInput: null,
+		};
+	}
+	componentWillUnmount() {
+		this.subscription.remove();
+	};
+	componentWillMount() {
+		var rendeByState = rendeState.bind(this);
+		rendeByState();
+	}
+	componentDidMount() {
+		this.subscription = DeviceEventEmitter.addListener('setLoginStateTrue', () => this.setState({
+			ifLogin: true
+		}));
+	}
+	signIn() {
+		getLocalPassword().then((result) => {
+			console.log(result);
+			if (result.from == 'firstSet') {
+				//TODO
+			} else {
+				if (CryptoJS.SHA256(this.state.passwordInput).toString() == result.passwordSHA256) {
+					alert('true');
+				} else {
+					if (this.state.passwordInput == '') {
+						alert('请输入密码');
+					} else {
+						alert('密码错误');
+					}
+				}
+			}
+		});
+	}
+	render() {
+		if (this.state.ifLogin == null) {
+			return (<View style={{backgroundColor: '#ececec', flex: 1,}}>
 					</View>)
-        }
-        return (
-            <View style={{backgroundColor: '#ececec', flex: 1,}}>
+		}
+		return (
+			<View style={{backgroundColor: '#ececec', flex: 1,}}>
                 <View style={styles.LoginCenter}>
                        <Text style={{color:'#515151', fontSize: 20}}>Welcome to SaiPassword</Text>
                 </View>
@@ -99,12 +108,12 @@ export class LoginScreen extends React.Component {
                 </View>
                 <View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>
               <Button
-				  onPress={()=>alert("那也是没有办法的事")}
+				  onPress={clearLoginState}
 				  title="Forgot password?"
 				  color="#515151"
 				  accessibilityLabel="Learn more about this purple button"/> 
 				</View>
             </View>
-        )
-    }
+		)
+	}
 }
