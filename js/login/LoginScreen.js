@@ -2,6 +2,8 @@ import React, {
     Component
 } from 'react';
 import {
+    DeviceEventEmitter,
+    TextInput,
     Navigator,
     TouchableOpacity,
     Button,
@@ -13,7 +15,11 @@ import {
 
 import NormalButton from '../common/Button';
 import routes from '../router/Router';
-
+import {
+    rendeState,
+    getLocalPassword,
+} from '../common/storageApi';
+var CryptoJS = require("crypto-js");
 const styles = StyleSheet.create({
     LoginCenter: {
         marginTop: 50,
@@ -24,22 +30,41 @@ const styles = StyleSheet.create({
         marginTop: 32,
     },
 });
-
-
-
-class PasswordInput extends React.Component {
-    render() {
-        return (
-            <Image source={require('../common/img/txt-input-copy.png')}>
-            <Image source={require('../common/img/lock-icon.png')} style={{marginLeft:10,marginTop:8}}></Image>
-            {/*<Text style={{textAlign:'center',backgroundColor:'#515151'}}>Inside</Text>*/}
-            </Image>
-        )
-    }
-}
-
 export class LoginScreen extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            ifLogin: null,
+            passwordInput: null,
+        };
+    }
+    componentWillUnmount() {
+        this.subscription.remove();
+    };
+    componentWillMount() {
+        var rendeByState = rendeState.bind(this);
+        rendeByState();
+    }
+    componentDidMount() {
+        this.subscription = DeviceEventEmitter.addListener('setLoginStateTrue', () => this.setState({
+            ifLogin: true
+        }));
+    }
+    signIn() {
+        getLocalPassword().then((result) => {
+            if(CryptoJS.SHA256(this.state.passwordInput).toString() == result){
+                alert ('true');
+            }
+            else{
+                alert('false');
+            }
+        });
+    }
     render() {
+        if (this.state.ifLogin == null) {
+            return (<View style={{backgroundColor: '#ececec', flex: 1,}}>
+					</View>)
+        }
         return (
             <View style={{backgroundColor: '#ececec', flex: 1,}}>
                 <View style={styles.LoginCenter}>
@@ -48,23 +73,31 @@ export class LoginScreen extends React.Component {
                 <View style={styles.LoginCenter}>
                     <Image source={require('../common/img/logo-mark.png')} />
                 </View>
-                {/*
+                {
+					this.state.ifLogin == true?(
                 <View style={[styles.LoginCenter,styles.LoginCenterTop]}>
-                    <PasswordInput />
-                </View>
-               */}
-                <View style={[styles.LoginCenter,{marginTop:20}]}>
-                   <NormalButton text='sign in' backgroundColor='#525252' />
-                </View>
-                <View style={[styles.LoginCenter,{marginTop:20}]} onPress={()=>this._navigate('signUp')}>
+                	<Image source={require('../common/img/txt-input-copy.png')} style={{flexDirection:'row'}}>
+            			<Image source={require('../common/img/lock-icon.png')} style={{marginLeft:10,marginTop:8}}></Image>
+							 <TextInput
+								style={{height: 26, width:160,marginLeft:10,marginTop:7}}
+								secureTextEntry={true}
+								onChangeText={(text) => this.setState({
+									passwordInput:text
+								})}
+								value={this.state.passwordInput}
+      						/> 
+            			</Image>
+                </View>) 
+                :(
+				<View style={[styles.LoginCenter,{marginTop:20}]} onPress={()=>this._navigate('signUp')}>
                    <NormalButton text='sign up' backgroundColor='#2EBB4E' onpress={()=>{this.props.navigator.push(routes[1]);}}  />
                 </View>
-                {/*
-                <View style={[styles.LoginCenter,{marginTop:20}]}>
-                   <NormalButton text='sign up' backgroundColor='green' />
+						)
+               }
+                <View style={[styles.LoginCenter,{marginTop:20}]} >
+                	<NormalButton text='sign in' backgroundColor='#525252' onpress={this.signIn.bind(this)} />
                 </View>
-                */}
-				<View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>
+                <View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>
               <Button
 				  onPress={()=>alert("那也是没有办法的事")}
 				  title="Forgot password?"

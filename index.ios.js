@@ -5,8 +5,8 @@
  */
 'use strict';
 const {
-    AppRegistry
+	AppRegistry
 } = require('react-native');
 const setup = require('./js/setup');
 
-AppRegistry.registerComponent('SaiPassword',() => setup);
+AppRegistry.registerComponent('SaiPassword', () => setup);

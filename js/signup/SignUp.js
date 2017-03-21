@@ -2,6 +2,7 @@ import React, {
 	Component
 } from 'react';
 import {
+	DeviceEventEmitter,
 	TouchableHighlight,
 	TouchableOpacity,
 	Button,
@@ -13,12 +14,15 @@ import {
 import routes from '../router/Router';
 import NormalButton from '../common/Button';
 var t = require('tcomb-form-native');
+var CryptoJS = require("crypto-js");
 var Form = t.form.Form;
 var User = t.struct({
 	userId: t.String,
 	password: t.String, // an optional string
+	key: t.String,
 	email: t.String,
 });
+
 var options = {
 	fields: {
 		password: {
@@ -26,8 +30,12 @@ var options = {
 			label: 'password',
 			error: 'Insert a valid password',
 		},
+		key: {
+			secureTextEntry: true,
+			label: 'keyword to Encrypt(please remember!!!write it down!)',
+			error: 'Insert a keyword',
+		},
 		email: {
-			// you can use strings or JSX
 			error: 'Insert a valid email',
 		},
 		userId: {
@@ -41,7 +49,6 @@ export class SignUpPage extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.name = '123';
 		this.state = {
 			options: options,
 			value: null
@@ -51,21 +58,39 @@ export class SignUpPage extends React.Component {
 	submit() {
 		var value = this.refs.form.getValue();
 		var getBack = this.props.navigator.pop;
-
 		if (value) { // if validation fails, value will be null
-			fetch('http://210.41.100.18:8080/signup', {
+			var updata = {
+				password: CryptoJS.AES.encrypt(value.password, value.key).toString(),
+				userId: value.userId,
+				email: value.email
+			};
+			fetch(ipAdress + '/signup', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(value)
+				body: JSON.stringify(updata)
 			}).then((res) => {
 				return res.json();
 			}).then((data) => {
 				var userExist = data.userExist
 				if (!userExist) {
 					alert('用户创建成功');
+					console.log()
+					storage.save({
+						key: 'loginState', // 注意:请不要在key中使用_下划线符号!
+						rawData: {
+							from: 'some other site',
+							userid: value.userId,
+							passwordSHA256: CryptoJS.SHA256(value.password).toString(),
+						},
+
+						// 如果不指定过期时间，则会使用defaultExpires参数
+						// 如果设为null，则永不过期
+						expires: null
+					});
+					DeviceEventEmitter.emit('setLoginStateTrue');
 					getBack();
 				} else {
 					var options = t.update(this.state.options, {

@@ -11,20 +11,18 @@ import {
     StyleSheet
 } from 'react-native';
 
-
 export class NavigatorSai extends React.Component {
-    render() {
+    render() {	
         return (<Navigator
       initialRoute={routes[0]}
       configureScene={(route, routeStack) => Navigator.SceneConfigs.HorizontalSwipeJump}
       renderScene={(route, navigator) =>{
 		  let Component = route.component;
-		return <Component  navigator={navigator} />
+		return <Component  navigator={navigator}  />
         }
     }
     />
-)
-}
+)}
 }
 
 import routes from './Router';

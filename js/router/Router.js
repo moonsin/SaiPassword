@@ -7,12 +7,12 @@ import {
 const routes = [{
         name: 'LoginScreen',
         index: 0,
-        component: LoginScreen
+        component: LoginScreen,
     },
     {
         name: 'SignUp',
         index: 1,
-        component: SignUpPage
+        component: SignUpPage,
     }
 ] ;
 export default routes; 
