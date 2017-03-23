@@ -21,7 +21,7 @@ var {
 var {
     ConfigPage
 } = require('../config/Config');
-
+import routes from '../router/Router';
 import {
     TabBarIcon
 } from './img/base64Icon';
@@ -51,7 +51,8 @@ export class TarBar extends React.Component {
 				 initialRoute={{                            
 	    		 component: pageComponent,                           
 			 	 title:title ,
-                 rightButtonIcon:require('./img/add-30.png')
+                 rightButtonIcon:require('./img/add-30.png'),
+                 onRightButtonPress:()=>{this.props.navigator.push(routes[3])}
                        }}                   
                  tintColor="red"
                  barTintColor="#f9f9f9"

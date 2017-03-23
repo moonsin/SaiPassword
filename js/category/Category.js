@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 
 import {
+    ScrollView,
     StyleSheet,
     View,
     Text,
@@ -10,26 +11,22 @@ import {
 var {
     SearchBar
 } = require('../common/searchBar');
+var {
+    ItemScrollView
+} = require('../common/itemScrollView');
 
 const styles = StyleSheet.create({
-    searchBar: {
-        marginTop: 50,
-        flexDirection: 'row',
-        justifyContent: 'center'
-    },
-    LoginCenterTop: {
-        marginTop: 32,
-    },
 });
 
 export class CategoryPage extends React.Component {
     render() {
         return (
-            <View style={{backgroundColor: '#FFF', flex: 1,marginTop:70}}>
-                <View>
-                    < SearchBar />      
-                </View>
+            <View style={{backgroundColor: '#FFF', flex: 1,marginTop:64,}}>
+                < SearchBar />      
+                <ScrollView style={{marginTop:-65,zIndex:0}}>
+                <ItemScrollView />
+                </ScrollView>
 		    </View>
-            )
+        )
     }
 }

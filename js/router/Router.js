@@ -7,6 +7,9 @@ import {
 import {
     TarBar
 } from '../common/TabBar';
+import {
+    AddItem
+} from '../category/addItem';
 const routes = [{
         name: 'LoginScreen',
         index: 0,
@@ -22,6 +25,12 @@ const routes = [{
         title: '',
         index: 2,
         component: TarBar,
+    },
+    {
+        name: 'AddItem',
+        title: '',
+        index: 3,
+        component: AddItem,
     },
 ];
 export default routes;
