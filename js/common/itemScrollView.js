@@ -24,8 +24,8 @@ var IconSource = {
     Passport: require('../common/img/category/Passport-48.png'),
     SoftwareLicense: require('../common/img/category/softwareLicense-48.png'),
     WiFi: require('../common/img/category/Wi-Fi-48.png'),
-
 }
+var AllItems = require('../common/img/category/Full Moon-30.png');
 
 const styles = StyleSheet.create({
     searchBar: {
@@ -39,20 +39,31 @@ export class ItemScrollView extends Component {
         super(props);
     };
 
-    makeModule(data) {
+    makeModule(data, page) {
         var addview = [];
         var index = 0;
-            for(var idx in data){
+        if(page !='AddItem'){
+            addview.push(<IconItem key={index++} type={'All Items'} source={AllItems} />);
+        }
+        for (var idx in data) {
                 addview.push(<IconItem key={index} type={idx} source={IconSource[idx]} />);
                 index++;
-            }
-      return addview;
+        }
+        for (; index <= 12; index++) {
+            addview.push(<NormalItem key={index} />);
+        }
+        return addview;
     }
 
     render() {
         var viewModule;
-        if(this.props.page =='AddItem'){ 
-            viewModule = this.makeModule(IconSource);
+        if (this.props.page == 'AddItem') {
+            viewModule = this.makeModule(IconSource,'AddItem');
+        } else {
+            viewModule = this.makeModule({
+                Login: '',
+                Passport: '',
+            },'category');
         }
         return (
             <View>
