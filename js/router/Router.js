@@ -5,9 +5,8 @@ import {
     LoginScreen
 } from '../login/LoginScreen';
 import {
-    CategoryPage
-} from '../category/Category';
-
+    TarBar
+} from '../common/TabBar';
 const routes = [{
         name: 'LoginScreen',
         index: 0,
@@ -19,9 +18,10 @@ const routes = [{
         component: SignUpPage,
     },
     {
-        name: 'Category',
-        index: 1,
-        component: CategoryPage,
-    }
+        name: 'TarBar',
+        title: '',
+        index: 2,
+        component: TarBar,
+    },
 ];
 export default routes;

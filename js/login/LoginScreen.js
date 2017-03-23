@@ -52,7 +52,7 @@ export class LoginScreen extends React.Component {
         }));
     }
     signIn() {
-        getLocalPassword().then((result) => {
+        /*getLocalPassword().then((result) => {
             console.log(result);
             if (result.from == 'firstSet') {
                 //TODO
@@ -69,6 +69,8 @@ export class LoginScreen extends React.Component {
                 }
             }
         });
+*/
+                        this.props.navigator.push(routes[2]);
     }
     render() {
         if (this.state.ifLogin == null) {

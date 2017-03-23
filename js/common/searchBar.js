@@ -7,9 +7,6 @@ import {
     View,
     Text,
 } from 'react-native';
-var {
-    SearchBar
-} = require('../common/searchBar');
 
 const styles = StyleSheet.create({
     searchBar: {
@@ -22,14 +19,10 @@ const styles = StyleSheet.create({
     },
 });
 
-export class CategoryPage extends React.Component {
+export class SearchBar extends Component {
     render() {
         return (
-            <View style={{backgroundColor: '#FFF', flex: 1,marginTop:70}}>
-                <View>
-                    < SearchBar />      
-                </View>
-		    </View>
-            )
+            <View></View>
+        )
     }
 }
