@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 
 import {
+    TouchableHighlight,
     Image,
     ScrollView,
     StyleSheet,
@@ -37,6 +38,7 @@ export class ItemScrollView extends Component {
     constructor(props) {
         super(props);
     };
+
     makeModule(data) {
         var addview = [];
         var index = 0;
@@ -63,12 +65,14 @@ export class ItemScrollView extends Component {
 class IconItem extends Component {
     render() {
         return (
-            <View style={{flexDirection:'row',height:46}}>
-                <Image source={this.props.source} style={{marginLeft:10,marginRight:10,marginTop:7,width:36,height:36}}></Image>
-                <View  style={{borderColor:'#b8b8b8',borderBottomWidth:1,flex:1}}>
-                    <Text style={{marginTop:16,fontSize:14,color:'#515151',fontFamily:'arial'}}>{this.props.type}</Text>
+            <TouchableHighlight  onPress={()=>{alert(123)}} underlayColor='#D2D2D2' >
+                <View style={{flexDirection:'row',height:46}}>
+                    <Image source={this.props.source} style={{marginLeft:10,marginRight:10,marginTop:7,width:36,height:36}}></Image>
+                    <View  style={{borderColor:'#D2D2D2',borderBottomWidth:1,flex:1}}>
+                        <Text style={{marginTop:16,fontSize:14,color:'#515151',fontFamily:'arial'}}>{this.props.type}</Text>
+                    </View>
                 </View>
-           </View>
+           </TouchableHighlight>
         )
     }
 }
