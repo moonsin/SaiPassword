@@ -60,7 +60,6 @@ export class TarBar extends React.Component {
         );
     }
     render() {
-             console.log(TabBarIcon.favorite);
         return (
             <View style={{backgroundColor: '#FFF', flex: 1,}}>
 			<TabBarIOS

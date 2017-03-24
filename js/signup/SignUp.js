@@ -49,6 +49,7 @@ var options = {
             onFocus: () => DeviceEventEmitter.emit('openBoard'),
         },
         userId: {
+            autoCapitalize:'none',
             label: 'user name',
             error: 'Insert a valid user name',
             keyboardType: 'default',

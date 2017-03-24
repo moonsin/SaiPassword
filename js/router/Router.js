@@ -10,6 +10,10 @@ import {
 import {
     AddItem
 } from '../category/addItem';
+import {
+    ItemAddPage
+} from '../category/ItemAddPage';
+
 const routes = [{
         name: 'LoginScreen',
         index: 0,
@@ -32,5 +36,13 @@ const routes = [{
         index: 3,
         component: AddItem,
     },
+    {
+        name: 'ItemAddPage',
+        title: '',
+        index: 4,
+        component: ItemAddPage,
+        rightButtonTitle:'完成',
+    },
+
 ];
 export default routes;

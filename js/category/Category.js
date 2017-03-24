@@ -24,7 +24,7 @@ export class CategoryPage extends React.Component {
             <View style={{backgroundColor: '#FFF', flex: 1,marginTop:64,}}>
                 < SearchBar />      
                 <ScrollView style={{marginTop:-65,zIndex:0}}>
-                <ItemScrollView />
+                <ItemScrollView navigator={this.props.navigator} />
                 </ScrollView>
 		    </View>
         )

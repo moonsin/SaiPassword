@@ -10,21 +10,10 @@ import {
     View,
     Text,
 } from 'react-native';
+import routes from '../router/Router';
 
-var IconSource = {
-    Login: require('../common/img/category/login-48.png'),
-    Indentity: require('../common/img/category/identity-48.png'),
-    BankCard: require('../common/img/category/BankCard-50.png'),
-    BankAccount: require('../common/img/category/BankAccount-50.png'),
-    DataBase: require('../common/img/category/Database-48.png'),
-    DriverLicense: require('../common/img/category/DriverLicense-48.png'),
-    Password: require('../common/img/category/password-48.png'),
-    Email: require('../common/img/category/email-48.png'),
-    Note: require('../common/img/category/Note-48.png'),
-    Passport: require('../common/img/category/Passport-48.png'),
-    SoftwareLicense: require('../common/img/category/softwareLicense-48.png'),
-    WiFi: require('../common/img/category/Wi-Fi-48.png'),
-}
+import IconSource from './IconRequire';
+
 var AllItems = require('../common/img/category/Full Moon-30.png');
 
 const styles = StyleSheet.create({
@@ -42,14 +31,14 @@ export class ItemScrollView extends Component {
     makeModule(data, page) {
         var addview = [];
         var index = 0;
-        if(page !='AddItem'){
-            addview.push(<IconItem key={index++} type={'All Items'} source={AllItems} />);
+        if (page != 'AddItem') {
+            addview.push(<IconItem key={index++} navigator={this.props.navigator}  type={'All Items'} source={AllItems} />);
         }
         for (var idx in data) {
-                addview.push(<IconItem key={index} type={idx} source={IconSource[idx]} />);
-                index++;
+            addview.push(<IconItem key={index} navigator={this.props.navigator} type={idx} source={IconSource[idx]} />);
+            index++;
         }
-        for (; index <= 12; index++) {
+        for (; index < 12; index++) {
             addview.push(<NormalItem key={index} />);
         }
         return addview;
@@ -58,12 +47,9 @@ export class ItemScrollView extends Component {
     render() {
         var viewModule;
         if (this.props.page == 'AddItem') {
-            viewModule = this.makeModule(IconSource,'AddItem');
+            viewModule = this.makeModule(IconSource, 'AddItem');
         } else {
-            viewModule = this.makeModule({
-                Login: '',
-                Passport: '',
-            },'category');
+            viewModule = this.makeModule({}, 'category');
         }
         return (
             <View>
@@ -76,7 +62,7 @@ export class ItemScrollView extends Component {
 class IconItem extends Component {
     render() {
         return (
-            <TouchableHighlight  onPress={()=>{alert(123)}} underlayColor='#D2D2D2' >
+            <TouchableHighlight  onPress={()=>{routes[4].passProps={type:this.props.type};this.props.navigator.push(routes[4])}} underlayColor='#D2D2D2' >
                 <View style={{flexDirection:'row',height:46}}>
                     <Image source={this.props.source} style={{marginLeft:10,marginRight:10,marginTop:7,width:36,height:36}}></Image>
                     <View  style={{borderColor:'#D2D2D2',borderBottomWidth:1,flex:1}}>

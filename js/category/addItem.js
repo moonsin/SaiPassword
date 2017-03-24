@@ -43,7 +43,7 @@ class AddItemPage extends React.Component{
             <View style={{backgroundColor: '#FFF', flex: 1,marginTop:64,}}>
                 < SearchBar title='主要保险库'/>      
                 <ScrollView style={{marginTop:-65,zIndex:0}}>
-                <ItemScrollView page='AddItem' />
+                <ItemScrollView page='AddItem' navigator={this.props.navigator} />
                 </ScrollView>
 		    </View>
         )
