@@ -11,8 +11,8 @@ import {
     AddItem
 } from '../category/addItem';
 import {
-    ItemAddPage
-} from '../category/ItemAddPage';
+    DetailPage,AddNodePage,noteSave
+} from '../category/DetailPage';
 
 const routes = [{
         name: 'LoginScreen',
@@ -37,11 +37,20 @@ const routes = [{
         component: AddItem,
     },
     {
-        name: 'ItemAddPage',
+        name: 'DetailPage',
         title: '',
         index: 4,
-        component: ItemAddPage,
+        component: DetailPage,
         rightButtonTitle:'完成',
+        passProps:'',
+    },
+    {
+        name: 'AddNodePage',
+        title: '',
+        index: 5,
+        component: AddNodePage,
+        rightButtonTitle:'保存',
+        onRightButtonPress:()=>{noteSave();},
     },
 
 ];
