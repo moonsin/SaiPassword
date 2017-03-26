@@ -1,7 +1,6 @@
 import React, {
     Component
 } from 'react';
-
 import {
     TouchableHighlight,
     DeviceEventEmitter,
@@ -63,33 +62,55 @@ const styles = StyleSheet.create({
         marginLeft: 40,
         marginTop: 5,
     },
-    noteBar_content:{
-        fontFamily:'courier',
-        fontSize:14,
-        marginLeft:40,
-        marginTop:4,
-        marginBottom:2,
+    noteBar_content: {
+        fontFamily: 'courier',
+        fontSize: 14,
+        marginLeft: 40,
+        marginTop: 4,
+        marginBottom: 2,
     },
-    noteBar_edit:{
-        fontFamily:'courier',
-        fontSize:14,
-        color:'red',
-        marginLeft:40,
-        marginBottom:5,
-    }
+    noteBar_edit: {
+        fontFamily: 'courier',
+        fontSize: 14,
+        color: 'red',
+        marginLeft: 40,
+        marginBottom: 5,
+    },
+    informationBar: {
+        borderBottomWidth: 1,
+        borderTopWidth: 1,
+        borderColor: '#D2D2D2',
+        backgroundColor: '#FFF',
+        marginTop: 20,
+    },
+    singleLayerInput_title: {
+        marginLeft:30,
+        marginRight:30,
+        marginTop: 4,
+        fontSize: 12,
+        color: '#C2C2C8',
+    },
+    singleLayerInput_content: {
+        marginLeft:30,
+        marginRight:30,
+        fontSize: 15,
+        marginTop: 6,
+        height: 16,
+        width: 240
+    },
 });
 
 var noteContent = {
-    value:'',
-    navigator:'',
+    value: '',
+    navigator: '',
 };
-
 function PageBuilder(pageType, typeCN, navigator) {
     var content = [];
     content.push(<HeadBar key={pageType} typeCN={typeCN} type={pageType}/>);
     if (pageType == 'Note') {
         content.push(<TextArea key='NoteTextArea' navigator={navigator}/>);
     }
+
     return content;
 }
 
@@ -101,10 +122,11 @@ export class DetailPage extends React.Component {
         };
     };
     render() {
-        var content = PageBuilder(this.props.type,this.state.type,this.props.navigator);
+        var content = PageBuilder(this.props.type, this.state.type, this.props.navigator);
         return (
             <View style={styles.container}>
                 {content}
+                <InformationBar/>
             </View>
         );
     }
@@ -136,9 +158,9 @@ class TextArea extends React.Component {
         this.subscription.remove();
     };
     componentDidMount() {
-        this.subscription = DeviceEventEmitter.addListener('noteSave', (value) =>{
+        this.subscription = DeviceEventEmitter.addListener('noteSave', (value) => {
             this.setState({
-                note:value.value,
+                note: value.value,
             });
         });
     }
@@ -159,7 +181,7 @@ class TextArea extends React.Component {
 
 export class AddNodePage extends React.Component {
     render() {
-        noteContent.navigator=this.props.navigator;
+        noteContent.navigator = this.props.navigator;
         return (
             <View style={{flex:1,marginTop:70,marginLeft:15,backgroundColor:'#FFFF',marginRight:15}}>
                 <TextInput onChangeText={(value)=>{noteContent.value=value}} style={{flex:1,fontSize:16}} multiline={true}  placeholder={'名称'} autoCapitalize='none' />
@@ -171,4 +193,50 @@ export class AddNodePage extends React.Component {
 export function noteSave() {
     DeviceEventEmitter.emit('noteSave', noteContent);
     noteContent.navigator.pop();
+}
+
+class InformationBar extends React.Component {
+    render() {
+        return (
+            <View style={styles.informationBar}>
+            <PasswordComponent top={true} bottom={true} backgroundcolor={'#fff'} /> 
+        </View>
+        )
+    }
+}
+
+class SingleLayerInput extends React.Component {
+    render() {
+        return (
+            <View>
+                <Text style={styles.singleLayerInput_title}>{this.props.title}</Text>
+                <TextInput style={styles.singleLayerInput_content} onChangeText={(value)=>{ this.props.changeText(value)}} autoCapitalize='none' placeholder={this.props.title} secureTextEntry={true}/>
+            </View>
+        )
+    }
+}
+class PasswordComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            showPassword: false,
+            passwordInput:'',
+        };
+    };
+    render() {
+        return (
+            <View style={{backgroundColor:this.props.backgroundcolor,marginTop:10,marginBottom:10}}>
+                <SingleLayerInput title='密码' changeText={(value)=>this.setState({passwordInput:value})}/>
+                <TouchableHighlight  onPress={()=>this.setState({showPassword:!this.state.showPassword})} underlayColor={this.props.backgroundcolor} >
+                    <View style={{marginLeft:30,marginRight:30,marginTop:4,borderTopWidth:0.5,borderColor:'#D2D2D2',paddingTop:10,paddingBottom:10,height:35}}>
+                    {this.state.showPassword == true?(
+                        <Text style={{fontSize:14}}>{this.state.passwordInput}</Text>
+                    ):(
+                        <Text style={{color:'red',fontSize:14}}>显示密码</Text>
+                    )}                    
+                    </View>
+                </TouchableHighlight>
+            </View>
+        )
+    }
 }
