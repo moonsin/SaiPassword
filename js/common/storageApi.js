@@ -54,7 +54,9 @@ export function getLocalPassword(localPassword) {
 }
 
 export function clearLoginState(localPassword) {
-    storage.remove({
-        key:'loginState',
+    /*storage.remove({
+        key:'Login',
     })
+    */
+    storage.clearMapForKey('Login');
 }

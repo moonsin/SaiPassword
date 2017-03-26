@@ -105,6 +105,7 @@ var noteContent = {
     navigator: '',
 };
 var submitValue = {};
+var DetailPageNav;
 
 function PageBuilder(pageType, typeCN, navigator) {
     var content = [];
@@ -127,6 +128,8 @@ export class DetailPage extends React.Component {
         this.state = {
             type: typeCN[this.props.type]
         };
+        submitValue.pageKind = this.props.type;
+        DetailPageNav = this.props.navigator;
     };
     render() {
         var content = PageBuilder(this.props.type, this.state.type, this.props.navigator);
@@ -200,8 +203,23 @@ export function noteSave() {
     DeviceEventEmitter.emit('noteSave', noteContent);
     noteContent.navigator.pop();
 }
+
 export function DetailPageSave() {
-    console.log(submitValue.Password);
+    console.log(submitValue);
+    if (!submitValue.headBarNmae) {
+        alert('名称不能为空')
+    } else {
+        storage.getIdsForKey(submitValue.pageKind).then(ret => {
+            storage.save({
+                key: submitValue.pageKind, // 注意:请不要在key中使用_下划线符号!
+                id: ret.length + 1,
+                rawData: submitValue,
+                // 如果设为null，则永不过期
+                expires: null
+            });
+            DetailPageNav.pop();
+        })
+    }
 }
 //InformationBar就是一个组
 class InformationBar extends React.Component {
@@ -212,7 +230,7 @@ class InformationBar extends React.Component {
         var content = [];
         var index = 0;
         if (this.props.type == 'Password') {
-            if(!submitValue.Password){
+            if (!submitValue.Password) {
                 submitValue.Password = {};
             }
             content.push(<PasswordComponent top={true} bottom={true} backgroundcolor={'#fff'} key={'PasswordComponent'+index} />);

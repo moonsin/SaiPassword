@@ -23,11 +23,39 @@ const styles = StyleSheet.create({
     },
 });
 
+function getLocalDataKind(AllKindData) {
+
+    var existData = [];
+    var localKindData = {};
+    for (var idx in AllKindData) {
+        existData.push({
+            key: idx,
+            id:'1',
+        });
+    }
+    //start
+    var getLocalKind = function() {
+        return storage.getBatchData(existData)
+    }
+    var getIfKind = async function() {
+        var existArray = await getLocalKind();
+        existArray.forEach(function(item) {
+            if (item != false) {
+                localKindData[item.pageKind] = true;
+            }
+        })
+        return localKindData;
+    }
+    return getIfKind();
+}
+
 export class ItemScrollView extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            viewModule: null
+        }
     };
-
     makeModule(data, page) {
         var addview = [];
         var index = 0;
@@ -43,17 +71,25 @@ export class ItemScrollView extends Component {
         }
         return addview;
     }
+    componentWillMount() {
+        if (this.props.page == 'AddItem') {
+            this.setState({
+                viewModule: this.makeModule(IconSource, 'AddItem'),
+            })
+        } else {
+            getLocalDataKind(IconSource).then((result) => {
+                this.setState({
+                    viewModule:this.makeModule(result, 'category')
+                })
+            });
+        }
+
+    }
 
     render() {
-        var viewModule;
-        if (this.props.page == 'AddItem') {
-            viewModule = this.makeModule(IconSource, 'AddItem');
-        } else {
-            viewModule = this.makeModule({}, 'category');
-        }
         return (
             <View>
-                {viewModule}
+                {this.state.viewModule}
             </View>
         )
     }
