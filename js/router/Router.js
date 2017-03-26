@@ -11,7 +11,10 @@ import {
     AddItem
 } from '../category/addItem';
 import {
-    DetailPage,AddNodePage,noteSave
+    DetailPage,
+    AddNodePage,
+    noteSave,
+    DetailPageSave,
 } from '../category/DetailPage';
 
 const routes = [{
@@ -41,16 +44,21 @@ const routes = [{
         title: '',
         index: 4,
         component: DetailPage,
-        rightButtonTitle:'完成',
-        passProps:'',
+        rightButtonTitle: '完成',
+        onRightButtonPress: () => {
+            DetailPageSave();
+        },
+        passProps: '',
     },
     {
         name: 'AddNodePage',
         title: '',
         index: 5,
         component: AddNodePage,
-        rightButtonTitle:'保存',
-        onRightButtonPress:()=>{noteSave();},
+        rightButtonTitle: '保存',
+        onRightButtonPress: () => {
+            noteSave();
+        },
     },
 
 ];
