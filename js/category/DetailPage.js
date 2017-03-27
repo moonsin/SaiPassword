@@ -107,13 +107,13 @@ var noteContent = {
 var submitValue = {};
 var DetailPageNav;
 
-function PageBuilder(pageType, typeCN, navigator) {
+function PageBuilder(pageType, typeCN, navigator, editable) {
     var content = [];
     var index = 0;
-    content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType}/>);
+    content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable}/>);
 
     if (pageType == 'Password') {
-        content.push(<InformationBar key={'PasswordInformationBar'+index} type={pageType} />);
+        content.push(<InformationBar key={'PasswordInformationBar'+index} type={pageType} editable={editable} />);
         index++;
     }
 
@@ -126,13 +126,28 @@ export class DetailPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            //中文
             type: typeCN[this.props.type]
         };
         submitValue.pageKind = this.props.type;
         DetailPageNav = this.props.navigator;
     };
+    getLocalData(type,id) {
+        if (!!id) {
+            //有id
+            storage.load({
+                key: type,
+                id: id,
+            }).then((result)=>{
+                console.log(result);
+            })
+            return
+        } else {}
+    };
     render() {
-        var content = PageBuilder(this.props.type, this.state.type, this.props.navigator);
+        //TODO
+        this.getLocalData(this.props.type,this.props.id);
+        var content = PageBuilder(this.props.type, this.state.type, this.props.navigator, this.props.editable);
         return (
             <View style={styles.container}>
                 {content}
@@ -208,8 +223,8 @@ export function DetailPageSave() {
     if (!submitValue.headBarName) {
         alert('名称不能为空')
     } else {
-        var timestamp = Date.parse(new Date()); 
-        submitValue.headBarName += '$AddItemTime$'+timestamp;
+        var timestamp = Date.parse(new Date());
+        submitValue.headBarName += '$AddItemTime$' + timestamp;
         storage.getIdsForKey(submitValue.pageKind).then(ret => {
             storage.save({
                 key: submitValue.pageKind, // 注意:请不要在key中使用_下划线符号!

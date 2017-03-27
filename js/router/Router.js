@@ -12,7 +12,7 @@ import {
 } from '../category/addItem';
 import {
     KindListPage
-} from '../category/kindListPage.js';
+} from '../category/kindListPage';
 import {
     DetailPage,
     AddNodePage,
@@ -51,7 +51,9 @@ const routes = [{
         onRightButtonPress: () => {
             DetailPageSave();
         },
-        passProps: '',
+        passProps: {
+            editable:true,
+        },
     },
     {
         name: 'AddNodePage',
@@ -69,6 +71,7 @@ const routes = [{
         index:6,
         component:KindListPage,
     },
+    
 
 ];
 export default routes;

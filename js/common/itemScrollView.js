@@ -62,12 +62,13 @@ function getLocalAllKindData(AllKindData) {
             }
         }
         for (var idx in allData) {
-            allData[idx].forEach(function(item) {
+            allData[idx].forEach(function(item, indexNum) {
                 allDataFormat[item.headBarName] = {};
                 //深度赋值
                 for (var index in item) {
                     allDataFormat[item.headBarName][index] = item[index];
                 }
+                allDataFormat[item.headBarName].id = indexNum+1;
             })
         }
         return allDataFormat;
@@ -82,12 +83,13 @@ function getLocalKindAllData(type) {
     var getData = async function() {
         var data = await getKindDataByType(type);
         var formatData = {};
-        data.forEach(function(item) {
+        data.forEach(function(item, index) {
             formatData[item.headBarName] = {};
             //深度赋值
             for (var idx in item) {
                 formatData[item.headBarName][idx] = item[idx];
             }
+            formatData[item.headBarName].id = index+1;
         });
         return formatData;
     }
@@ -105,17 +107,18 @@ export class ItemScrollView extends Component {
         var addview = [];
         var index = 0;
         if (page == 'CategoryPage') {
-            addview.push(<IconItem key={index++} navigator={this.props.navigator}  type={'All Items'} source={AllItems} fromPage={page} />);
+            addview.push(<IconItem key={index++} navigator={this.props.navigator} title={'All Items'}  type={'All Items'} source={AllItems} fromPage={page} />);
         }
         if (page == 'KindListPage') {
             for (var idx in data) {
                 var name = idx.split('$AddItemTime$');
                 type = data[idx].pageKind;
-                addview.push(<IconItem key={index++} navigator={this.props.navigator} type={name[0]} source={IconSource[type]} fromPage={page} />);
+                id = data[idx].id
+                addview.push(<IconItem key={index++} id={id} navigator={this.props.navigator} title={name[0]} type={type} source={IconSource[type]} fromPage={page} />);
             }
         } else {
             for (var idx in data) {
-                addview.push(<IconItem key={index++} navigator={this.props.navigator} type={idx} source={IconSource[idx]} fromPage={page} />);
+                addview.push(<IconItem key={index++} navigator={this.props.navigator} title={idx} type={idx} source={IconSource[idx]} fromPage={page} />);
             }
         }
         for (; index < 12; index++) {
@@ -137,7 +140,6 @@ export class ItemScrollView extends Component {
         } else if (this.props.page == 'KindListPage') {
             if (this.props.type == 'All Items') {
                 getLocalAllKindData(IconSource).then((result) => {
-                    console.log(result);
                     this.setState({
                         viewModule: this.makeModule(result, this.props.page, this.props.type),
                     })
@@ -173,6 +175,14 @@ class IconItem extends Component {
                 type: this.props.type,
             };
             this.props.navigator.push(routes[6]);
+        } else if (this.props.fromPage == 'KindListPage') {
+            routes[4].passProps = {
+                type: this.props.type,
+                id: this.props.id,
+                editable: false,
+            };
+            routes[4].rightButtonTitle = '编辑';
+            this.props.navigator.push(routes[4]);
         }
     }
     render() {
@@ -181,7 +191,7 @@ class IconItem extends Component {
                 <View style={{flexDirection:'row',height:46}}>
                     <Image source={this.props.source} style={{marginLeft:10,marginRight:10,marginTop:7,width:36,height:36}}></Image>
                     <View  style={{borderColor:'#D2D2D2',borderBottomWidth:1,flex:1}}>
-                        <Text style={{marginTop:16,fontSize:14,color:'#515151',fontFamily:'arial'}}>{this.props.type}</Text>
+                        <Text style={{marginTop:16,fontSize:14,color:'#515151',fontFamily:'arial'}}>{this.props.title}</Text>
                     </View>
                 </View>
            </TouchableHighlight>
