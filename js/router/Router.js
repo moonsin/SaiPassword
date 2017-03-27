@@ -11,6 +11,9 @@ import {
     AddItem
 } from '../category/addItem';
 import {
+    KindListPage
+} from '../category/kindListPage.js';
+import {
     DetailPage,
     AddNodePage,
     noteSave,
@@ -59,6 +62,12 @@ const routes = [{
         onRightButtonPress: () => {
             noteSave();
         },
+    },
+    {
+        name:'KindListPage',
+        title:'',
+        index:6,
+        component:KindListPage,
     },
 
 ];

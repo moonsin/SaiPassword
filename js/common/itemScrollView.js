@@ -30,10 +30,9 @@ function getLocalDataKind(AllKindData) {
     for (var idx in AllKindData) {
         existData.push({
             key: idx,
-            id:'1',
+            id: '1',
         });
     }
-    //start
     var getLocalKind = function() {
         return storage.getBatchData(existData)
     }
@@ -49,6 +48,52 @@ function getLocalDataKind(AllKindData) {
     return getIfKind();
 }
 
+function getLocalAllKindData(AllKindData) {
+    var allData = {};
+    var allDataFormat = {};
+    var getKindDataByType = function(type) {
+        return storage.getAllDataForKey(type);
+    }
+    var getData = async function(type) {
+        for (var idx in AllKindData) {
+            var data = await getKindDataByType(idx);
+            if (data != '') {
+                allData[idx] = data;
+            }
+        }
+        for (var idx in allData) {
+            allData[idx].forEach(function(item) {
+                allDataFormat[item.headBarName] = {};
+                //深度赋值
+                for (var index in item) {
+                    allDataFormat[item.headBarName][index] = item[index];
+                }
+            })
+        }
+        return allDataFormat;
+    }
+    return getData();
+}
+
+function getLocalKindAllData(type) {
+    var getKindDataByType = function(type) {
+        return storage.getAllDataForKey(type);
+    }
+    var getData = async function() {
+        var data = await getKindDataByType(type);
+        var formatData = {};
+        data.forEach(function(item) {
+            formatData[item.headBarName] = {};
+            //深度赋值
+            for (var idx in item) {
+                formatData[item.headBarName][idx] = item[idx];
+            }
+        });
+        return formatData;
+    }
+    return getData();
+}
+
 export class ItemScrollView extends Component {
     constructor(props) {
         super(props);
@@ -56,15 +101,22 @@ export class ItemScrollView extends Component {
             viewModule: null
         }
     };
-    makeModule(data, page) {
+    makeModule(data, page, type) {
         var addview = [];
         var index = 0;
-        if (page != 'AddItem') {
-            addview.push(<IconItem key={index++} navigator={this.props.navigator}  type={'All Items'} source={AllItems} />);
+        if (page == 'CategoryPage') {
+            addview.push(<IconItem key={index++} navigator={this.props.navigator}  type={'All Items'} source={AllItems} fromPage={page} />);
         }
-        for (var idx in data) {
-            addview.push(<IconItem key={index} navigator={this.props.navigator} type={idx} source={IconSource[idx]} />);
-            index++;
+        if (page == 'KindListPage') {
+            for (var idx in data) {
+                var name = idx.split('$AddItemTime$');
+                type = data[idx].pageKind;
+                addview.push(<IconItem key={index++} navigator={this.props.navigator} type={name[0]} source={IconSource[type]} fromPage={page} />);
+            }
+        } else {
+            for (var idx in data) {
+                addview.push(<IconItem key={index++} navigator={this.props.navigator} type={idx} source={IconSource[idx]} fromPage={page} />);
+            }
         }
         for (; index < 12; index++) {
             addview.push(<NormalItem key={index} />);
@@ -76,14 +128,28 @@ export class ItemScrollView extends Component {
             this.setState({
                 viewModule: this.makeModule(IconSource, 'AddItem'),
             })
-        } else {
+        } else if (this.props.page == 'CategoryPage') {
             getLocalDataKind(IconSource).then((result) => {
                 this.setState({
-                    viewModule:this.makeModule(result, 'category')
+                    viewModule: this.makeModule(result, this.props.page)
                 })
             });
+        } else if (this.props.page == 'KindListPage') {
+            if (this.props.type == 'All Items') {
+                getLocalAllKindData(IconSource).then((result) => {
+                    console.log(result);
+                    this.setState({
+                        viewModule: this.makeModule(result, this.props.page, this.props.type),
+                    })
+                });
+            } else {
+                getLocalKindAllData(this.props.type).then((result) => {
+                    this.setState({
+                        viewModule: this.makeModule(result, this.props.page, this.props.type),
+                    })
+                });
+            }
         }
-
     }
 
     render() {
@@ -96,9 +162,22 @@ export class ItemScrollView extends Component {
 }
 
 class IconItem extends Component {
+    onpress() {
+        if (this.props.fromPage == 'AddItem') {
+            routes[4].passProps = {
+                type: this.props.type
+            };
+            this.props.navigator.push(routes[4])
+        } else if (this.props.fromPage == 'CategoryPage') {
+            routes[6].passProps = {
+                type: this.props.type,
+            };
+            this.props.navigator.push(routes[6]);
+        }
+    }
     render() {
         return (
-            <TouchableHighlight  onPress={()=>{routes[4].passProps={type:this.props.type};this.props.navigator.push(routes[4])}} underlayColor='#D2D2D2' >
+            <TouchableHighlight  onPress={()=>{this.onpress()}} underlayColor='#D2D2D2' >
                 <View style={{flexDirection:'row',height:46}}>
                     <Image source={this.props.source} style={{marginLeft:10,marginRight:10,marginTop:7,width:36,height:36}}></Image>
                     <View  style={{borderColor:'#D2D2D2',borderBottomWidth:1,flex:1}}>

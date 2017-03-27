@@ -58,5 +58,5 @@ export function clearLoginState(localPassword) {
         key:'Login',
     })
     */
-    storage.clearMapForKey('Login');
+    storage.clearMapForKey('Email');
 }

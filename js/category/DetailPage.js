@@ -149,7 +149,7 @@ class HeadBar extends React.Component {
                     <Image source={IconSource[this.props.type]} style={styles.headBar_image}></Image>
                 </View>
                 <View style={styles.headBar_name}>
-                    <TextInput style={styles.headBar_input} autoCapitalize='none' placeholder={this.props.typeCN+' 名称'} onChangeText={(value)=>{submitValue.headBarNmae=value;}}/>
+                    <TextInput style={styles.headBar_input} autoCapitalize='none' placeholder={this.props.typeCN+' 名称'} onChangeText={(value)=>{submitValue.headBarName=value;}}/>
                 </View>
             </View>
         )
@@ -175,7 +175,7 @@ class TextArea extends React.Component {
     }
     render() {
         return (
-            <TouchableHighlight style={styles.noteBar} onPress={()=>{console.log(submitValue);this.props.navigator.push(routes[5])}} underlayColor='#D2D2D2'>
+            <TouchableHighlight style={styles.noteBar} onPress={()=>{this.props.navigator.push(routes[5])}} underlayColor='#D2D2D2'>
                 <View>
                     <Text style={styles.noteBar_title} >备注</Text>
                     <Text style={styles.noteBar_content}>{this.state.note}</Text>
@@ -205,10 +205,11 @@ export function noteSave() {
 }
 
 export function DetailPageSave() {
-    console.log(submitValue);
-    if (!submitValue.headBarNmae) {
+    if (!submitValue.headBarName) {
         alert('名称不能为空')
     } else {
+        var timestamp = Date.parse(new Date()); 
+        submitValue.headBarName += '$AddItemTime$'+timestamp;
         storage.getIdsForKey(submitValue.pageKind).then(ret => {
             storage.save({
                 key: submitValue.pageKind, // 注意:请不要在key中使用_下划线符号!
@@ -253,7 +254,6 @@ class SingleLayerInput extends React.Component {
             this.props.changeText(value);
         }
         submitValue[this.props.groupName][this.props.type] = value;
-        console.log(submitValue);
     }
     render() {
         return (

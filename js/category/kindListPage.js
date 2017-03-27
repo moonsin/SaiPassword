@@ -18,13 +18,13 @@ var {
 const styles = StyleSheet.create({
 });
 
-export class CategoryPage extends React.Component {
+export class KindListPage extends React.Component {
     render() {
         return (
             <View style={{backgroundColor: '#FFF', flex: 1,marginTop:64,}}>
                 < SearchBar />      
                 <ScrollView style={{marginTop:-65,zIndex:0}}>
-                <ItemScrollView navigator={this.props.navigator} page='CategoryPage' />
+                <ItemScrollView navigator={this.props.navigator} page='KindListPage' type={this.props.type} />
                 </ScrollView>
 		    </View>
         )
