@@ -107,17 +107,23 @@ var noteContent = {
 var submitValue = {};
 var DetailPageNav;
 
-function PageBuilder(pageType, typeCN, navigator, editable) {
+function PageBuilder(pageType, typeCN, navigator, editable, data) {
     var content = [];
     var index = 0;
-    content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable}/>);
+    var headBarName = '';
+    var notecontent = '';
+    if (data != null) {
+        headBarName = data.headBarName;
+        notecontent = data.noteContent;
+    }
+    content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={headBarName}/>);
 
     if (pageType == 'Password') {
         content.push(<InformationBar key={'PasswordInformationBar'+index} type={pageType} editable={editable} />);
         index++;
     }
 
-    content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator}/>);
+    content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={notecontent} />);
 
     return content;
 }
@@ -127,30 +133,46 @@ export class DetailPage extends React.Component {
         super(props);
         this.state = {
             //中文
-            type: typeCN[this.props.type]
+            type: typeCN[this.props.type],
+            content: []
         };
         submitValue.pageKind = this.props.type;
         DetailPageNav = this.props.navigator;
     };
-    getLocalData(type,id) {
+
+    getLocalData(type, id) {
         if (!!id) {
             //有id
-            storage.load({
-                key: type,
-                id: id,
-            }).then((result)=>{
-                console.log(result);
-            })
-            return
-        } else {}
+            var getLocalData = function() {
+                return storage.load({
+                    key: type,
+                    id: id,
+                })
+            }
+            var localDataForId = async function() {
+                var data = await getLocalData();
+                return data;
+            }
+            return localDataForId();
+        } else {
+            return new Promise(function(resolve) {
+                resolve(null);
+            });
+        }
     };
-    render() {
+    componentWillMount() {
         //TODO
-        this.getLocalData(this.props.type,this.props.id);
-        var content = PageBuilder(this.props.type, this.state.type, this.props.navigator, this.props.editable);
+        this.getLocalData(this.props.type, this.props.id).then((result) => {
+            this.setState({
+                content: PageBuilder(this.props.type, this.state.type, this.props.navigator, this.props.editable, result),
+            })
+        });
+    }
+
+    render() {
         return (
             <View style={styles.container}>
-                {content}
+                {this.state.content}
             </View>
         );
     }
@@ -158,13 +180,18 @@ export class DetailPage extends React.Component {
 
 class HeadBar extends React.Component {
     render() {
+        var headBarName = '';
+        if (this.props.headBarName) {
+            var headBarNameArray = this.props.headBarName.split('$AddItemTime$');
+            headBarName = headBarNameArray[0]
+        }
         return (
             <View style={styles.headBar}>
                 <View style={{flex:2}}>
                     <Image source={IconSource[this.props.type]} style={styles.headBar_image}></Image>
                 </View>
                 <View style={styles.headBar_name}>
-                    <TextInput style={styles.headBar_input} autoCapitalize='none' placeholder={this.props.typeCN+' 名称'} onChangeText={(value)=>{submitValue.headBarName=value;}}/>
+                    <TextInput style={styles.headBar_input} autoCapitalize='none' placeholder={this.props.typeCN+' 名称'} onChangeText={(value)=>{submitValue.headBarName=value;}} editable={this.props.editable} defaultValue={headBarName} />
                 </View>
             </View>
         )
@@ -182,6 +209,9 @@ class TextArea extends React.Component {
         this.subscription.remove();
     };
     componentDidMount() {
+        this.setState({
+            note:this.props.notecontent,
+        });
         this.subscription = DeviceEventEmitter.addListener('noteSave', (value) => {
             this.setState({
                 note: value.value,
@@ -190,12 +220,17 @@ class TextArea extends React.Component {
     }
     render() {
         return (
-            <TouchableHighlight style={styles.noteBar} onPress={()=>{this.props.navigator.push(routes[5])}} underlayColor='#D2D2D2'>
+            <TouchableHighlight style={styles.noteBar} onPress={()=>{
+                console.log(this.props.editable);
+                if(this.props.editable){
+                    this.props.navigator.push(routes[5])
+                }
+            }} underlayColor='#D2D2D2'>
                 <View>
                     <Text style={styles.noteBar_title} >备注</Text>
                     <Text style={styles.noteBar_content}>{this.state.note}</Text>
                     {
-                        this.state.note == '' ?  (<View></View>) : (<Text style={styles.noteBar_edit}>点击以编辑</Text>)
+                        this.state.note == ''||!this.props.editable ?  (<View></View>) : (<Text style={styles.noteBar_edit}>点击以编辑</Text>)
                     }
                 </View> 
             </TouchableHighlight>

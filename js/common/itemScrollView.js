@@ -167,7 +167,8 @@ class IconItem extends Component {
     onpress() {
         if (this.props.fromPage == 'AddItem') {
             routes[4].passProps = {
-                type: this.props.type
+                type: this.props.type,
+                editable:true,
             };
             this.props.navigator.push(routes[4])
         } else if (this.props.fromPage == 'CategoryPage') {
