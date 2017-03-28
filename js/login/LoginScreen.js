@@ -16,6 +16,7 @@ import {
 import NormalButton from '../common/Button';
 import routes from '../router/Router';
 import {
+    savePassword,
     rendeState,
     getLocalPassword,
     clearLoginState,
@@ -52,14 +53,14 @@ export class LoginScreen extends React.Component {
         }));
     }
     signIn() {
-        /*getLocalPassword().then((result) => {
+        getLocalPassword().then((result) => {
             console.log(result);
             if (result.from == 'firstSet') {
                 //TODO
             } else {
                 if (CryptoJS.SHA256(this.state.passwordInput).toString() == result.passwordSHA256) {
-                    //alert('true');
-                        this.props.navigator.push(routes[2]);
+                    savePassword(this.state.passwordInput);
+                    this.props.navigator.push(routes[2]);
                 } else {
                     if (this.state.passwordInput == '') {
                         alert('请输入密码');
@@ -69,8 +70,8 @@ export class LoginScreen extends React.Component {
                 }
             }
         });
-*/
-                        this.props.navigator.push(routes[2]);
+        //测试用
+        //this.props.navigator.push(routes[2]);
     }
     render() {
         if (this.state.ifLogin == null) {

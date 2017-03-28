@@ -1,8 +1,11 @@
 import React, {
     Component
 } from 'react';
-
 import {
+    DetailPageSave,
+} from '../category/DetailPage';
+import {
+    DeviceEventEmitter,
     TouchableHighlight,
     Image,
     ScrollView,
@@ -68,7 +71,7 @@ function getLocalAllKindData(AllKindData) {
                 for (var index in item) {
                     allDataFormat[item.headBarName][index] = item[index];
                 }
-                allDataFormat[item.headBarName].id = indexNum+1;
+                allDataFormat[item.headBarName].id = indexNum + 1;
             })
         }
         return allDataFormat;
@@ -89,7 +92,7 @@ function getLocalKindAllData(type) {
             for (var idx in item) {
                 formatData[item.headBarName][idx] = item[idx];
             }
-            formatData[item.headBarName].id = index+1;
+            formatData[item.headBarName].id = index + 1;
         });
         return formatData;
     }
@@ -126,32 +129,42 @@ export class ItemScrollView extends Component {
         }
         return addview;
     }
-    componentWillMount() {
-        if (this.props.page == 'AddItem') {
-            this.setState({
-                viewModule: this.makeModule(IconSource, 'AddItem'),
-            })
-        } else if (this.props.page == 'CategoryPage') {
-            getLocalDataKind(IconSource).then((result) => {
+    componentWillUnmount() {
+        this.subscription.remove();
+    };
+    componentDidMount() {
+        function makeAllMoudule() {
+            if (this.props.page == 'AddItem') {
                 this.setState({
-                    viewModule: this.makeModule(result, this.props.page)
+                    viewModule: this.makeModule(IconSource, 'AddItem'),
                 })
-            });
-        } else if (this.props.page == 'KindListPage') {
-            if (this.props.type == 'All Items') {
-                getLocalAllKindData(IconSource).then((result) => {
+            } else if (this.props.page == 'CategoryPage') {
+                getLocalDataKind(IconSource).then((result) => {
                     this.setState({
-                        viewModule: this.makeModule(result, this.props.page, this.props.type),
+                        viewModule: this.makeModule(result, this.props.page)
                     })
                 });
-            } else {
-                getLocalKindAllData(this.props.type).then((result) => {
-                    this.setState({
-                        viewModule: this.makeModule(result, this.props.page, this.props.type),
-                    })
-                });
+            } else if (this.props.page == 'KindListPage') {
+                if (this.props.type == 'All Items') {
+                    getLocalAllKindData(IconSource).then((result) => {
+                        this.setState({
+                            viewModule: this.makeModule(result, this.props.page, this.props.type),
+                        })
+                    });
+                } else {
+                    getLocalKindAllData(this.props.type).then((result) => {
+                        this.setState({
+                            viewModule: this.makeModule(result, this.props.page, this.props.type),
+                        })
+                    });
+                }
             }
         }
+        var makeAll = makeAllMoudule.bind(this);
+        this.subscription = DeviceEventEmitter.addListener('itemEditDone', (value) => {
+            makeAll();
+        });
+        makeAll();
     }
 
     render() {
@@ -168,8 +181,12 @@ class IconItem extends Component {
         if (this.props.fromPage == 'AddItem') {
             routes[4].passProps = {
                 type: this.props.type,
-                editable:true,
+                editable: true,
             };
+            routes[4].rightButtonTitle = '完成';
+            routes[4].onRightButtonPress = () => {
+                DetailPageSave(false);
+            }
             this.props.navigator.push(routes[4])
         } else if (this.props.fromPage == 'CategoryPage') {
             routes[6].passProps = {
@@ -183,6 +200,18 @@ class IconItem extends Component {
                 editable: false,
             };
             routes[4].rightButtonTitle = '编辑';
+            routes[4].onRightButtonPress = () => {
+                routes[4].passProps = {
+                    type: this.props.type,
+                    id: this.props.id,
+                    editable: true,
+                }
+                routes[4].rightButtonTitle = '完成';
+                routes[4].onRightButtonPress = () => {
+                    DetailPageSave(true, this.props.type, this.props.id);
+                }
+                this.props.navigator.push(routes[4]);
+            }
             this.props.navigator.push(routes[4]);
         }
     }

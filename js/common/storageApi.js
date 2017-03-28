@@ -5,7 +5,7 @@ export function rendeState() {
         key: 'loginState',
     }).then(ret => {
         //storage.remove({
-          //  key: 'loginState'  
+        //  key: 'loginState'  
         //})
 
         this.setState({
@@ -25,10 +25,19 @@ export function rendeState() {
         }
     })
 }
-
+export function savePassword(pw) {
+    storage.save({
+        key: 'SaipasswordAccessPassword',
+        rawData : {
+            password: pw,
+        },
+        //有效期半小时
+        expires: 500 * 3600
+    })
+}
 export function getLocalPassword(localPassword) {
     var readStorageByLoginState = function() {
-       return storage.load({
+        return storage.load({
             key: 'loginState',
         }).catch(err => {
             // 如果没有找到数据且没有sync方法，
@@ -43,8 +52,8 @@ export function getLocalPassword(localPassword) {
                     break;
             }
         })
-     }
-    
+    }
+
     var getStorageByPassword = async function() {
         var ret = await readStorageByLoginState();
         return ret;
@@ -58,5 +67,5 @@ export function clearLoginState(localPassword) {
         key:'Login',
     })
     */
-    storage.clearMapForKey('Email');
+    storage.clearMapForKey('DataBase');
 }

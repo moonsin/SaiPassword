@@ -11,6 +11,7 @@ import {
     View,
     Text,
 } from 'react-native';
+var CryptoJS = require("crypto-js");
 import routes from '../router/Router';
 import IconSource from '../common/IconRequire';
 import typeCN from '../common/typeCN';
@@ -112,6 +113,7 @@ function PageBuilder(pageType, typeCN, navigator, editable, data) {
     var index = 0;
     var headBarName = '';
     var notecontent = '';
+    console.log(data);
     if (data != null) {
         headBarName = data.headBarName;
         notecontent = data.noteContent;
@@ -136,10 +138,7 @@ export class DetailPage extends React.Component {
             type: typeCN[this.props.type],
             content: []
         };
-        submitValue.pageKind = this.props.type;
-        DetailPageNav = this.props.navigator;
     };
-
     getLocalData(type, id) {
         if (!!id) {
             //有id
@@ -160,13 +159,34 @@ export class DetailPage extends React.Component {
             });
         }
     };
-    componentWillMount() {
-        //TODO
-        this.getLocalData(this.props.type, this.props.id).then((result) => {
-            this.setState({
-                content: PageBuilder(this.props.type, this.state.type, this.props.navigator, this.props.editable, result),
-            })
+    componentWillUnmount() {
+        this.subscription.remove();
+    };
+    componentDidMount() {
+        function setStateContent(type, id) {
+            this.getLocalData(type, id).then((result) => {
+                this.setState({
+                    content: PageBuilder(this.props.type, this.state.type, this.props.navigator, this.props.editable, result),
+                })
+            });
+        }
+        var setContent = setStateContent.bind(this);
+        this.subscription = DeviceEventEmitter.addListener('itemEditDone', (value) => {
+            setContent(value.type, value.id);
         });
+
+        //set submitValue
+        if (this.props.id) {
+            storage.load({
+                key: this.props.type,
+                id: this.props.id
+            }).then((result) => {
+                submitValue = result;
+            })
+        }
+        submitValue.pageKind = this.props.type;
+        DetailPageNav = this.props.navigator;
+        setContent(this.props.type, this.props.id);
     }
 
     render() {
@@ -210,7 +230,7 @@ class TextArea extends React.Component {
     };
     componentDidMount() {
         this.setState({
-            note:this.props.notecontent,
+            note: this.props.notecontent,
         });
         this.subscription = DeviceEventEmitter.addListener('noteSave', (value) => {
             this.setState({
@@ -221,8 +241,10 @@ class TextArea extends React.Component {
     render() {
         return (
             <TouchableHighlight style={styles.noteBar} onPress={()=>{
-                console.log(this.props.editable);
                 if(this.props.editable){
+                    routes[5].passProps={
+                        notecontent:this.props.notecontent,
+                    }
                     this.props.navigator.push(routes[5])
                 }
             }} underlayColor='#D2D2D2'>
@@ -243,7 +265,7 @@ export class AddNodePage extends React.Component {
         noteContent.navigator = this.props.navigator;
         return (
             <View style={{flex:1,marginTop:70,marginLeft:15,backgroundColor:'#FFFF',marginRight:15}}>
-                <TextInput onChangeText={(value)=>{noteContent.value=value;submitValue.noteContent = value;}} style={{flex:1,fontSize:16}} multiline={true}  placeholder={'名称'} autoCapitalize='none' />
+                <TextInput onChangeText={(value)=>{noteContent.value=value;submitValue.noteContent = value;}} style={{flex:1,fontSize:16}} multiline={true} defaultValue={this.props.notecontent}  placeholder={'名称'} autoCapitalize='none' />
             </View>
         )
     }
@@ -254,22 +276,84 @@ export function noteSave() {
     noteContent.navigator.pop();
 }
 
-export function DetailPageSave() {
+export function DetailPageSave(exist, oldtype, oldid) {
+    function changeRightButton() {
+        routes[4].rightButtonTitle = '编辑';
+        routes[4].onRightButtonPress = () => {
+            routes[4].passProps = {
+                type: submitValue.pageKind,
+                id: id,
+                editable: true,
+            }
+            routes[4].rightButtonTitle = '完成';
+            routes[4].onRightButtonPress = () => {
+                DetailPageSave(true, submitValue.pageKind, id);
+            }
+            DetailPageNav.push(routes[4]);
+        }
+    }
+
+    function changeLeftButtion() {
+        routes[4].leftButtonTitle = '返回';
+        routes[4].onLeftButtonPress = () => {
+            routes[6].passProps = {
+                type: submitValue.pageKind,
+            };
+            routes[6].leftButtonTitle = '类别';
+            routes[6].onLeftButtonPress = () => {
+                this.props.navigator.resetTo(routes[2])
+            }
+            DetailPageNav.push(routes[6])
+        }
+    }
     if (!submitValue.headBarName) {
         alert('名称不能为空')
     } else {
         var timestamp = Date.parse(new Date());
         submitValue.headBarName += '$AddItemTime$' + timestamp;
-        storage.getIdsForKey(submitValue.pageKind).then(ret => {
+        var id;
+        if (!exist) {
+            storage.getIdsForKey(submitValue.pageKind).then(ret => {
+                id = ret.length + 1;
+                console.log(submitValue);
+                storage.save({
+                    key: submitValue.pageKind, // 注意:请不要在key中使用_下划线符号!
+                    id: id,
+                    rawData: submitValue,
+                    // 如果设为null，则永不过期
+                    expires: null
+                }).then(() => {
+                    _backToDetailPage(id, submitValue.pageKind, exist);
+                });
+            })
+        } else {
+            id = oldid;
             storage.save({
-                key: submitValue.pageKind, // 注意:请不要在key中使用_下划线符号!
-                id: ret.length + 1,
+                key: submitValue.pageKind,
+                id: oldid,
                 rawData: submitValue,
-                // 如果设为null，则永不过期
-                expires: null
-            });
-            DetailPageNav.pop();
-        })
+                expires: null,
+            }).then(() => {
+                _backToDetailPage(id, submitValue.pageKind, exist);
+            })
+        }
+
+        function _backToDetailPage(id, type) {
+            if (exist) {
+                changeRightButton();
+                DeviceEventEmitter.emit('itemEditDone', {
+                    id: id,
+                    type: type
+                })
+                DetailPageNav.pop();
+            } else {
+                DeviceEventEmitter.emit('itemEditDone', {
+                    id: id,
+                    type: type
+                })
+                DetailPageNav.pop();
+            }
+        }
     }
 }
 //InformationBar就是一个组
@@ -301,9 +385,28 @@ class InformationBar extends React.Component {
 class SingleLayerInput extends React.Component {
     saveValue(value) {
         if (this.props.title == '密码') {
+            var saveValue = value;
             this.props.changeText(value);
+
+            function getSaiPassword() {
+                var getLocalRealPassword = function() {
+                    return storage.load({
+                        key: 'SaipasswordAccessPassword',
+                    });
+                }
+                var accessPassword = async function() {
+                    var password = await getLocalRealPassword()
+                    return password;
+                }
+              return accessPassword();
+            }
+            getSaiPassword().then((result)=>{
+                saveValue = CryptoJS.AES.encrypt(saveValue+'', result+'').toString();
+                submitValue[this.props.groupName][this.props.type] = saveValue;
+            })
+        } else {
+            submitValue[this.props.groupName][this.props.type] = value;
         }
-        submitValue[this.props.groupName][this.props.type] = value;
     }
     render() {
         return (

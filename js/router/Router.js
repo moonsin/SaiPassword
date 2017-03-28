@@ -17,7 +17,6 @@ import {
     DetailPage,
     AddNodePage,
     noteSave,
-    DetailPageSave,
 } from '../category/DetailPage';
 
 const routes = [{
@@ -35,6 +34,8 @@ const routes = [{
         title: '',
         index: 2,
         component: TarBar,
+       rightButtonIcon:require('../common/img/add-30.png'),
+        // onRightButtonPress:()=>{this.props.navigator.push(routes[3])}
     },
     {
         name: 'AddItem',
@@ -47,9 +48,8 @@ const routes = [{
         title: '',
         index: 4,
         component: DetailPage,
-        rightButtonTitle: '完成',
+        rightButtonTitle: '',
         onRightButtonPress: () => {
-            DetailPageSave();
         },
         passProps: {
             editable:true,
