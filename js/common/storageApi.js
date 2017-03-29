@@ -69,3 +69,6 @@ export function clearLoginState(localPassword) {
     */
     storage.clearMapForKey('Password');
 }
+export function clearSaiPassword(){
+    storage.clearMapForKey('SaipasswordAccessPassword');
+}

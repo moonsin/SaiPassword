@@ -95,4 +95,10 @@ export var sync = {
         } = params;
         resolve(false);
     },
+    SaipasswordAccessPassword(params){
+        let {
+            resolve
+        } = params;
+        resolve(false);
+    }
 };

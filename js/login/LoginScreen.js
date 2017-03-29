@@ -2,6 +2,7 @@ import React, {
     Component
 } from 'react';
 import {
+    AppState,
     DeviceEventEmitter,
     TextInput,
     Navigator,
@@ -20,6 +21,7 @@ import {
     rendeState,
     getLocalPassword,
     clearLoginState,
+    clearSaiPassword,
 } from '../common/storageApi';
 var CryptoJS = require("crypto-js");
 const styles = StyleSheet.create({
@@ -42,12 +44,21 @@ export class LoginScreen extends React.Component {
     }
     componentWillUnmount() {
         this.subscription.remove();
+        AppState.removeEventListener('change');
     };
     componentWillMount() {
         var rendeByState = rendeState.bind(this);
         rendeByState();
     }
+    _clearPasswordAndTest(){
+        clearSaiPassword();
+        routes[0].passProps={
+            test:true,
+        }
+        this.props.navigator.push(routes[0]);
+    }
     componentDidMount() {
+        AppState.addEventListener('change', this._clearPasswordAndTest);
         this.subscription = DeviceEventEmitter.addListener('setLoginStateTrue', () => this.setState({
             ifLogin: true
         }));
@@ -56,11 +67,14 @@ export class LoginScreen extends React.Component {
         getLocalPassword().then((result) => {
             console.log(result);
             if (result.from == 'firstSet') {
-                //TODO
             } else {
                 if (CryptoJS.SHA256(this.state.passwordInput).toString() == result.passwordSHA256) {
                     savePassword(this.state.passwordInput);
-                    this.props.navigator.push(routes[2]);
+                    if (this.props.test) {
+                        this.props.navigator.pop(); 
+                    } else {
+                        this.props.navigator.push(routes[2]);
+                    }
                 } else {
                     if (this.state.passwordInput == '') {
                         alert('请输入密码');
