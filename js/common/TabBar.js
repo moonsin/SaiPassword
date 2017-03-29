@@ -52,7 +52,8 @@ export class TarBar extends React.Component {
 	    		 component: pageComponent,                           
 			 	 title:title ,
                  rightButtonIcon:require('./img/add-30.png'),
-                 onRightButtonPress:()=>{this.props.navigator.push(routes[3])}
+                 onRightButtonPress:()=>{
+                         this.props.navigator.push(routes[3])}
                        }}                   
                  tintColor="red"
                  barTintColor="#f9f9f9"

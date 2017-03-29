@@ -27,7 +27,6 @@ const styles = StyleSheet.create({
 });
 
 function getLocalDataKind(AllKindData) {
-
     var existData = [];
     var localKindData = {};
     for (var idx in AllKindData) {
@@ -103,7 +102,8 @@ export class ItemScrollView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            viewModule: null
+            viewModule: null,
+            addPage: false,
         }
     };
     makeModule(data, page, type) {
@@ -131,14 +131,11 @@ export class ItemScrollView extends Component {
     }
     componentWillUnmount() {
         this.subscription.remove();
+        this.getAddItemType.remove();
     };
     componentDidMount() {
         function makeAllMoudule() {
-            if (this.props.page == 'AddItem') {
-                this.setState({
-                    viewModule: this.makeModule(IconSource, 'AddItem'),
-                })
-            } else if (this.props.page == 'CategoryPage') {
+            if (this.props.page == 'CategoryPage') {
                 getLocalDataKind(IconSource).then((result) => {
                     this.setState({
                         viewModule: this.makeModule(result, this.props.page)
@@ -164,6 +161,17 @@ export class ItemScrollView extends Component {
         this.subscription = DeviceEventEmitter.addListener('itemEditDone', (value) => {
             makeAll();
         });
+        this.getAddItemType = DeviceEventEmitter.addListener('AddItemPageChooseItem', (value) => {
+            routes[4].passProps = {
+                type: value.type,
+                editable: true,
+            };
+            routes[4].rightButtonTitle = '完成';
+            routes[4].onRightButtonPress = () => {
+                DetailPageSave(false, this.props.type, this.props.id);
+            }
+            this.props.navigator.push(routes[4]);
+        });
         makeAll();
     }
 
@@ -178,17 +186,7 @@ export class ItemScrollView extends Component {
 
 class IconItem extends Component {
     onpress() {
-        if (this.props.fromPage == 'AddItem') {
-            routes[4].passProps = {
-                type: this.props.type,
-                editable: true,
-            };
-            routes[4].rightButtonTitle = '完成';
-            routes[4].onRightButtonPress = () => {
-                DetailPageSave(false);
-            }
-            this.props.navigator.push(routes[4])
-        } else if (this.props.fromPage == 'CategoryPage') {
+        if (this.props.fromPage == 'CategoryPage') {
             routes[6].passProps = {
                 type: this.props.type,
             };

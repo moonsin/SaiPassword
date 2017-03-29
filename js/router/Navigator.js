@@ -17,7 +17,6 @@ export class NavigatorSai extends React.Component {
       initialRoute={routes[0]}
       configureScene={(route, routeStack) =>{
           var conf;
-          console.log(route);
           if(route.name == 'AddItem' ||route.name == 'ItemAddPage'){
               conf = Navigator.SceneConfigs.FloatFromBottom ; 
           }

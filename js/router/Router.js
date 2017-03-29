@@ -34,7 +34,7 @@ const routes = [{
         title: '',
         index: 2,
         component: TarBar,
-       rightButtonIcon:require('../common/img/add-30.png'),
+        rightButtonIcon: require('../common/img/add-30.png'),
         // onRightButtonPress:()=>{this.props.navigator.push(routes[3])}
     },
     {
@@ -42,6 +42,10 @@ const routes = [{
         title: '',
         index: 3,
         component: AddItem,
+        //rightButtonTitle: '取消',
+        //onRightButtonPress: () => {
+        //  this.props.navigator.pop()
+        //}
     },
     {
         name: 'DetailPage',
@@ -49,10 +53,9 @@ const routes = [{
         index: 4,
         component: DetailPage,
         rightButtonTitle: '',
-        onRightButtonPress: () => {
-        },
+        onRightButtonPress: () => {},
         passProps: {
-            editable:true,
+            editable: true,
         },
     },
     {
@@ -66,12 +69,12 @@ const routes = [{
         },
     },
     {
-        name:'KindListPage',
-        title:'',
-        index:6,
-        component:KindListPage,
+        name: 'KindListPage',
+        title: '',
+        index: 6,
+        component: KindListPage,
     },
-    
+
 
 ];
 export default routes;

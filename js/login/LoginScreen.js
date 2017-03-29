@@ -58,12 +58,13 @@ export class LoginScreen extends React.Component {
         this.props.navigator.push(routes[0]);
     }
     componentDidMount() {
-        AppState.addEventListener('change', this._clearPasswordAndTest);
+        // AppState.addEventListener('change', this._clearPasswordAndTest);
         this.subscription = DeviceEventEmitter.addListener('setLoginStateTrue', () => this.setState({
             ifLogin: true
         }));
     }
     signIn() {
+        /*
         getLocalPassword().then((result) => {
             console.log(result);
             if (result.from == 'firstSet') {
@@ -84,8 +85,9 @@ export class LoginScreen extends React.Component {
                 }
             }
         });
+        */
         //测试用
-        //this.props.navigator.push(routes[2]);
+        this.props.navigator.push(routes[2]);
     }
     render() {
         if (this.state.ifLogin == null) {

@@ -114,12 +114,11 @@ function PageBuilder(pageType, typeCN, navigator, editable, data) {
     if (data != null) {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={data.headBarName}/>);
         for (var idx in data) {
-            console.log(idx);
             if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind') {
                 content.push(<InformationBar key={'PasswordInformationBar'+index++} type={pageType} editable={editable} data={data[idx]}/>);
             }
         }
-        content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={data.notecontent} />);
+        content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={data.noteContent} />);
     } else {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} />);
         if (pageType == 'Password') {
@@ -164,6 +163,7 @@ export class DetailPage extends React.Component {
         this.subscription.remove();
     };
     componentDidMount() {
+
         function setStateContent(type, id) {
             this.getLocalData(type, id).then((result) => {
                 this.setState({
@@ -173,7 +173,9 @@ export class DetailPage extends React.Component {
         }
         var setContent = setStateContent.bind(this);
         this.subscription = DeviceEventEmitter.addListener('itemEditDone', (value) => {
-            setContent(value.type, value.id);
+            if (value.fromPage == 'addItemDetail') {} else {
+                setContent(value.type, value.id);
+            }
         });
 
         //set submitValue
@@ -294,21 +296,6 @@ export function DetailPageSave(exist, oldtype, oldid) {
         }
     }
 
-    /*  function changeLeftButtion() {
-        routes[4].leftButtonTitle = '返回';
-        routes[4].onLeftButtonPress = () => {
-            routes[6].passProps = {
-                type: submitValue.pageKind,
-            };
-            routes[6].leftButtonTitle = '类别';
-            routes[6].onLeftButtonPress = () => {
-                this.props.navigator.resetTo(routes[2])
-            }
-            DetailPageNav.push(routes[6])
-        }
-    }
-    */
-
     if (!submitValue.headBarName) {
         alert('名称不能为空')
     } else {
@@ -340,20 +327,26 @@ export function DetailPageSave(exist, oldtype, oldid) {
             })
         }
 
-        function _backToDetailPage(id, type) {
+        function _backToDetailPage(id, type, exist) {
+
             if (exist) {
-                changeRightButton();
                 DeviceEventEmitter.emit('itemEditDone', {
                     id: id,
-                    type: type
+                    type: type,
                 })
+                changeRightButton();
                 DetailPageNav.pop();
             } else {
                 DeviceEventEmitter.emit('itemEditDone', {
                     id: id,
-                    type: type
+                    type: type,
+                    fromPage: 'addItemDetail',
                 })
-                DetailPageNav.pop();
+                routes[6].passProps = {
+                    type: type,
+                    fromPage: 'addItemDetail',
+                };
+                DetailPageNav.replace(routes[6])
             }
         }
     }
@@ -423,9 +416,9 @@ class SingleLayerInput extends React.Component {
         if (this.props.type == 'Password') {
             this.secure = true;
             this.getSaiPassword().then((result) => {
-                var value = CryptoJS.AES.decrypt(this.state.value, result.password ).toString(CryptoJS.enc.Utf8);
+                var value = CryptoJS.AES.decrypt(this.state.value, result.password).toString(CryptoJS.enc.Utf8);
                 this.setState({
-                    value:value,
+                    value: value,
                 })
                 this.props.changeText(value);
             })
