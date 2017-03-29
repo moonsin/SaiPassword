@@ -111,21 +111,22 @@ var DetailPageNav;
 function PageBuilder(pageType, typeCN, navigator, editable, data) {
     var content = [];
     var index = 0;
-    var headBarName = '';
-    var notecontent = '';
-    console.log(data);
     if (data != null) {
-        headBarName = data.headBarName;
-        notecontent = data.noteContent;
+        content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={data.headBarName}/>);
+        for (var idx in data) {
+            console.log(idx);
+            if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind') {
+                content.push(<InformationBar key={'PasswordInformationBar'+index++} type={pageType} editable={editable} data={data[idx]}/>);
+            }
+        }
+        content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={data.notecontent} />);
+    } else {
+        content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} />);
+        if (pageType == 'Password') {
+            content.push(<InformationBar key={'PasswordInformationBar'+index++} type={pageType} editable={editable} />);
+        }
+        content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable}  />);
     }
-    content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={headBarName}/>);
-
-    if (pageType == 'Password') {
-        content.push(<InformationBar key={'PasswordInformationBar'+index} type={pageType} editable={editable} />);
-        index++;
-    }
-
-    content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={notecontent} />);
 
     return content;
 }
@@ -293,7 +294,7 @@ export function DetailPageSave(exist, oldtype, oldid) {
         }
     }
 
-    function changeLeftButtion() {
+    /*  function changeLeftButtion() {
         routes[4].leftButtonTitle = '返回';
         routes[4].onLeftButtonPress = () => {
             routes[6].passProps = {
@@ -306,6 +307,8 @@ export function DetailPageSave(exist, oldtype, oldid) {
             DetailPageNav.push(routes[6])
         }
     }
+    */
+
     if (!submitValue.headBarName) {
         alert('名称不能为空')
     } else {
@@ -315,7 +318,6 @@ export function DetailPageSave(exist, oldtype, oldid) {
         if (!exist) {
             storage.getIdsForKey(submitValue.pageKind).then(ret => {
                 id = ret.length + 1;
-                console.log(submitValue);
                 storage.save({
                     key: submitValue.pageKind, // 注意:请不要在key中使用_下划线符号!
                     id: id,
@@ -368,7 +370,7 @@ class InformationBar extends React.Component {
             if (!submitValue.Password) {
                 submitValue.Password = {};
             }
-            content.push(<PasswordComponent top={true} bottom={true} backgroundcolor={'#fff'} key={'PasswordComponent'+index} />);
+            content.push(<PasswordComponent top={true} bottom={true} backgroundcolor={'#fff'} key={'PasswordComponent'+index} data={this.props.data||''} editable={this.props.editable} />);
         }
         return content;
     };
@@ -383,36 +385,57 @@ class InformationBar extends React.Component {
 }
 
 class SingleLayerInput extends React.Component {
+    constructor(props) {
+        super(props);
+        this.secure = false;
+        this.state = {
+            value: this.props.data,
+        }
+    };
+    getSaiPassword() {
+        var getLocalRealPassword = function() {
+            return storage.load({
+                key: 'SaipasswordAccessPassword',
+            });
+        }
+        var accessPassword = async function() {
+            var password = await getLocalRealPassword()
+            return password;
+        }
+        return accessPassword();
+    }
     saveValue(value) {
         if (this.props.title == '密码') {
             var saveValue = value;
             this.props.changeText(value);
-
-            function getSaiPassword() {
-                var getLocalRealPassword = function() {
-                    return storage.load({
-                        key: 'SaipasswordAccessPassword',
-                    });
-                }
-                var accessPassword = async function() {
-                    var password = await getLocalRealPassword()
-                    return password;
-                }
-              return accessPassword();
-            }
-            getSaiPassword().then((result)=>{
-                saveValue = CryptoJS.AES.encrypt(saveValue+'', result+'').toString();
+            this.getSaiPassword().then((result) => {
+                saveValue = CryptoJS.AES.encrypt(saveValue, result.password).toString();
                 submitValue[this.props.groupName][this.props.type] = saveValue;
             })
         } else {
             submitValue[this.props.groupName][this.props.type] = value;
         }
     }
+    getRealPassword() {
+
+    }
+    componentWillMount() {
+        if (this.props.type == 'Password') {
+            this.secure = true;
+            this.getSaiPassword().then((result) => {
+                var value = CryptoJS.AES.decrypt(this.state.value, result.password ).toString(CryptoJS.enc.Utf8);
+                this.setState({
+                    value:value,
+                })
+                this.props.changeText(value);
+            })
+        }
+    }
     render() {
         return (
             <View>
                 <Text style={styles.singleLayerInput_title}>{this.props.title}</Text>
-                <TextInput style={styles.singleLayerInput_content} onChangeText={(value)=>{this.saveValue(value)}} autoCapitalize='none' placeholder={this.props.title} secureTextEntry={true}/>
+                <TextInput style={styles.singleLayerInput_content} onChangeText={(value)=>{this.saveValue(value)}} autoCapitalize='none' placeholder={this.props.title} secureTextEntry={this.secure} defaultValue={this.state.value} />
             </View>
         )
     }
@@ -426,10 +449,12 @@ class PasswordComponent extends React.Component {
             passwordInput: '',
         };
     };
+
     render() {
+        var password = this.props.data.Password;
         return (
             <View style={{backgroundColor:this.props.backgroundcolor,marginTop:10,marginBottom:10}}>
-                <SingleLayerInput title='密码' changeText={(value)=>this.setState({passwordInput:value})} groupName='Password' type='Password'/>
+                <SingleLayerInput title='密码' changeText={(value)=>this.setState({passwordInput:value})} groupName='Password' type='Password' editable={this.props.editable} data={password}  />
                 <TouchableHighlight  onPress={()=>this.setState({showPassword:!this.state.showPassword})} underlayColor={this.props.backgroundcolor} >
                     <View style={{marginLeft:30,marginRight:30,marginTop:4,borderTopWidth:0.5,borderColor:'#D2D2D2',paddingTop:10,paddingBottom:10,height:35}}>
                     {this.state.showPassword == true?(
