@@ -17,6 +17,7 @@ import {
 import NormalButton from '../common/Button';
 import routes from '../router/Router';
 import {
+    clearAllkindData,
     savePassword,
     rendeState,
     getLocalPassword,
@@ -50,10 +51,10 @@ export class LoginScreen extends React.Component {
         var rendeByState = rendeState.bind(this);
         rendeByState();
     }
-    _clearPasswordAndTest(){
+    _clearPasswordAndTest() {
         clearSaiPassword();
-        routes[0].passProps={
-            test:true,
+        routes[0].passProps = {
+            test: true,
         }
         this.props.navigator.push(routes[0]);
     }
@@ -65,27 +66,27 @@ export class LoginScreen extends React.Component {
     }
     signIn() {
         /*
-        getLocalPassword().then((result) => {
-            console.log(result);
-            if (result.from == 'firstSet') {
-            } else {
-                if (CryptoJS.SHA256(this.state.passwordInput).toString() == result.passwordSHA256) {
-                    savePassword(this.state.passwordInput);
-                    if (this.props.test) {
-                        this.props.navigator.pop(); 
-                    } else {
-                        this.props.navigator.push(routes[2]);
-                    }
+            getLocalPassword().then((result) => {
+                console.log(result);
+                if (result.from == 'firstSet') {
                 } else {
-                    if (this.state.passwordInput == '') {
-                        alert('请输入密码');
+                    if (CryptoJS.SHA256(this.state.passwordInput).toString() == result.passwordSHA256) {
+                        savePassword(this.state.passwordInput);
+                        if (this.props.test) {
+                            this.props.navigator.pop(); 
+                        } else {
+                            this.props.navigator.push(routes[2]);
+                        }
                     } else {
-                        alert('密码错误');
+                        if (this.state.passwordInput == '') {
+                            alert('请输入密码');
+                        } else {
+                            alert('密码错误');
+                        }
                     }
                 }
-            }
-        });
-        */
+            });
+            */
         //测试用
         this.props.navigator.push(routes[2]);
     }
@@ -128,7 +129,7 @@ export class LoginScreen extends React.Component {
                 </View>
                 <View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>
               <Button
-				  onPress={clearLoginState}
+				  onPress={clearAllkindData}
 				  title="Forgot password?"
 				  color="#515151"
 				  accessibilityLabel="Learn more about this purple button"/> 
