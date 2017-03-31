@@ -110,6 +110,7 @@ export function getIntoEditDetailPage(type, id, navigator) {
     routes[4].onRightButtonPress = () => {
         DetailPageSave(true, type, id).then(() => {
             clearSubmitValues();
+            console.log('clearSubmitValues');
             DeviceEventEmitter.emit('EditItemDone');
             changePreViewAndPopToDetaiPage(type, id, navigator);
         });

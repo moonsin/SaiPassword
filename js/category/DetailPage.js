@@ -89,21 +89,22 @@ const styles = StyleSheet.create({
         borderColor: '#D2D2D2',
         backgroundColor: '#FFF',
         marginTop: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        paddingLeft: 30,
     },
     singleLayerInput_title: {
-        marginLeft: 30,
-        marginRight: 30,
         marginTop: 4,
         fontSize: 12,
         color: '#C2C2C8',
     },
     singleLayerInput_content: {
-        marginLeft: 30,
-        marginRight: 30,
         fontSize: 15,
         marginTop: 6,
         height: 16,
-        width: 240
+        width: 240,
+        borderBottomWidth: 0.5,
+        borderColor: '#D2D2D2',
     },
 });
 
@@ -132,14 +133,17 @@ function PageBuilder(pageType, typeCN, editable, navigator, data) {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={data.headBarName}/>);
         for (var idx in data) {
             if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind') {
-                content.push(<InformationBar key={'PasswordInformationBar'+index++} type={pageType} editable={editable} data={data[idx]}/>);
+                content.push(<InformationBar key={idx+'InformationBar'+index++} type={idx} editable={editable} data={data[idx]}/>);
             }
         }
         content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={data.noteContent} />);
     } else {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} />);
         if (pageType == 'Password') {
-            content.push(<InformationBar key={'PasswordInformationBar'+index++} type={pageType} editable={editable} />);
+            content.push(<InformationBar key={'PasswordInformationBar'+index++} type="Password" editable={editable} />);
+        }
+        if (pageType == 'Login') {
+            content.push(<InformationBar key={'LoginPlaceInformationBar'+index++} type="loginPlace" editable={editable} />);
         }
         content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable}  />);
     }
@@ -206,6 +210,9 @@ export class DetailPage extends React.Component {
                 }
             })
         }
+        else{
+            submitValue = {};
+        }
         pageKind = this.props.type;
         DetailPageNav = this.props.navigator;
         setContent(this.props.type, this.props.id);
@@ -233,7 +240,7 @@ class HeadBar extends React.Component {
                     <Image source={IconSource[this.props.type]} style={styles.headBar_image}></Image>
                 </View>
                 <View style={styles.headBar_name}>
-                    <TextInput style={styles.headBar_input} autoCapitalize='none' placeholder={this.props.typeCN+' 名称'} onChangeText={(value)=>{submitValue.headBarName=value;}} editable={this.props.editable} defaultValue={headBarName} />
+                    <TextInput style={styles.headBar_input} autoCapitalize='none' placeholder={this.props.typeCN+' 名称'} onChangeText={(value)=>{submitValue.headBarName=value;console.log(submitValue)}} editable={this.props.editable} defaultValue={headBarName} />
                 </View>
             </View>
         )
@@ -251,12 +258,13 @@ class TextArea extends React.Component {
     componentWillUnmount() {
         this.noteReset.remove();
         this.subscription.remove();
+        this.subScript.remove()
     };
     componentDidMount() {
         this.setState({
             note: this.props.notecontent,
         });
-        this.subScript = DeviceEventEmitter.addListener('EditItemDone',()=>{
+        this.subScript = DeviceEventEmitter.addListener('EditItemDone', () => {
             this.firstNote = noteContent.value;
             clearNoteContent();
         })
@@ -319,6 +327,7 @@ export function DetailPageSave(exist, oldtype, oldid) {
     if (!submitValue.headBarName) {
         alert('名称不能为空')
     } else {
+        console.log(submitValue);
         var timestamp = Date.parse(new Date());
         submitValue.headBarName += '$AddItemTime$' + timestamp;
         var id;
@@ -332,6 +341,8 @@ export function DetailPageSave(exist, oldtype, oldid) {
                     rawData: submitValue,
                     expires: null
                 }).then(() => {
+                    clearSubmitValues();
+                    console.log(submitValue);
                     _backToDetailPage(id, pageKind, exist);
                 });
             })
@@ -370,7 +381,18 @@ class InformationBar extends React.Component {
             if (!submitValue.Password) {
                 submitValue.Password = {};
             }
-            content.push(<PasswordComponent top={true} bottom={true} backgroundcolor={'#fff'} key={'PasswordComponent'+index} data={this.props.data||''} editable={this.props.editable} />);
+            content.push(<PasswordComponent top={true} bottom={true} backgroundcolor={'#fff'} key={'PasswordComponent'+index++} data={this.props.data||''} editable={this.props.editable} />);
+        }
+        if (this.props.type == 'loginPlace') {
+            var data = {};
+            if (!submitValue.loginPlace) {
+                submitValue.loginPlace = {};
+            }
+            if (this.props.data) {
+                data = this.props.data;
+            };
+            content.push(<SingleLayerInput title='网站'  key={'loginPlaceComponent'+index++} groupName='loginPlace' type='loginSite' editable={this.props.editable} data={data.loginSite} />)
+            content.push(<SingleLayerInput title='APP'  bottom={true} key={'loginPlaceComponent'+index++} groupName='loginPlace' type='loginAPP'  editable={this.props.editable} data={data.loginAPP} />)
         }
         return content;
     };
@@ -416,10 +438,17 @@ class SingleLayerInput extends React.Component {
             submitValue[this.props.groupName][this.props.type] = value;
         }
     }
-    getRealPassword() {
+    componentWillUnmount() {
+        this.subScript.remove()
+    };
 
+    componentDidMount() {
+        this.subScript = DeviceEventEmitter.addListener('EditItemDone', () => {
+
+        })
     }
     componentWillMount() {
+        this.border = {};
         if (this.props.type == 'Password') {
             this.secure = true;
             this.getSaiPassword().then((result) => {
@@ -433,12 +462,19 @@ class SingleLayerInput extends React.Component {
                 this.props.changeText(value);
             })
         }
+        if (!this.props.bottom) {
+            this.border = {
+                borderColor: '#929292',
+                borderBottomWidth: 0.5,
+                paddingBottom: 6,
+            }
+        }
     }
     render() {
         return (
-            <View>
+            <View style={this.border}>
                 <Text style={styles.singleLayerInput_title}>{this.props.title}</Text>
-                <TextInput style={styles.singleLayerInput_content} onChangeText={(value)=>{this.saveValue(value)}} autoCapitalize='none' placeholder={this.props.title} secureTextEntry={this.secure} defaultValue={this.state.value} />
+                <TextInput style={styles.singleLayerInput_content} onChangeText={(value)=>{this.saveValue(value)}} autoCapitalize='none' editable={this.props.editable} placeholder={this.props.title} secureTextEntry={this.secure} defaultValue={this.props.type=='Password'?(this.state.value):(this.props.data)} />
             </View>
         )
     }
@@ -455,10 +491,10 @@ class PasswordComponent extends React.Component {
     render() {
         var password = this.props.data.Password;
         return (
-            <View style={{backgroundColor:this.props.backgroundcolor,marginTop:10,marginBottom:10}}>
+            <View style={{backgroundColor:this.props.backgroundcolor}}>
                 <SingleLayerInput title='密码' changeText={(value)=>this.setState({passwordInput:value})} groupName='Password' type='Password' editable={this.props.editable} data={password}  />
                 <TouchableHighlight  onPress={()=>this.setState({showPassword:!this.state.showPassword})} underlayColor={this.props.backgroundcolor} >
-                    <View style={{marginLeft:30,marginRight:30,marginTop:4,borderTopWidth:0.5,borderColor:'#D2D2D2',paddingTop:10,paddingBottom:10,height:35}}>
+                    <View style={{paddingTop:10,paddingBottom:10,height:35}}>
                     {this.state.showPassword == true?(
                         <Text style={{fontSize:14}}>{this.state.passwordInput}</Text>
                     ):(

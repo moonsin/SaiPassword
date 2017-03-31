@@ -26,7 +26,7 @@ var storage = new Storage({
 	// 则会调用相应的sync方法，无缝返回最新数据。
 	sync:sync 
 })
-global.ipAdress ='http://210.41.101.199:8888'; 
+global.ipAdress ='http://210.41.99.221:8888'; 
 global.storage = storage;
 
 var {
