@@ -86,7 +86,7 @@ export class LoginScreen extends React.Component {
                     }
                 }
             });
-        */
+            */
         //测试用
         this.props.navigator.push(routes[2]);
     }

@@ -209,8 +209,7 @@ export class DetailPage extends React.Component {
                     submitValue[idx] = result[idx];
                 }
             })
-        }
-        else{
+        } else {
             submitValue = {};
         }
         pageKind = this.props.type;
@@ -444,7 +443,14 @@ class SingleLayerInput extends React.Component {
 
     componentDidMount() {
         this.subScript = DeviceEventEmitter.addListener('EditItemDone', () => {
-
+            console.log(this.props);
+            this.getSaiPassword().then((result) => {
+                var pass =CryptoJS.AES.decrypt(this.props.data, result.password).toString(CryptoJS.enc.Utf8);
+                this.setState({
+                    value: pass
+                })
+                this.props.changeText(pass);
+            })
         })
     }
     componentWillMount() {
