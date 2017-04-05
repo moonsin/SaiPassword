@@ -376,11 +376,9 @@ export function DetailPageSave(exist, oldtype, oldid) {
 class InformationBar extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			data: this.props.data || {},
-		}
 	};
 	informationBarBuilder() {
+		console.log(this.props.data);
 		function initGroup(groupName) {
 			if (!submitValue[groupName]) {
 				submitValue[groupName] = {};
@@ -443,9 +441,20 @@ class SingleTimelayer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			date: this.props.data || new Date(),
+			date: new Date(),
 		}
 	};
+
+	componentWillUnmount() {
+		this.subScript.remove()
+	};
+
+	componentDidMount() {
+		this.subScript = DeviceEventEmitter.addListener('EditItemDone', () => {
+			this.setState({
+				date: data,
+			})		})
+	}
 
 	componentWillMount() {
 		if (this.props.data) {
@@ -467,30 +476,13 @@ class SingleTimelayer extends React.Component {
 			})
 		}
 	}
-	componentDidUpdate() {
-		if ((Date.parse(new Date(this.props.data)) != Date.parse(this.state.date)) && this.props.editable != true) {
-			this.setState({
-				date: new Date(this.props.data),
-			})
-		}
-	}
 	render() {
-		var date = this.props.data;
-		date = new Date(date);
-		date = date.toLocaleDateString();
 		return (
-			<View>
-			<Text style={styles.singleLayerInput_title}>{this.props.title}</Text>
-			{this.props.editable==false?(
-		<TextInput style={styles.singleLayerInput_content}  editable={this.props.editable} placeholder={this.props.default?(this.props.default):(this.props.title)}  defaultValue={date} />
-			):(
 			<DatePickerIOS
             	mode="date"
 				date={this.state.date}
 				onDateChange={(date)=>this.setNewTime(date)}
             />
-			)}
-			</View>
 		)
 	}
 }

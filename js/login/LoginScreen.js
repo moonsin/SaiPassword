@@ -129,7 +129,7 @@ export class LoginScreen extends React.Component {
                 </View>
                 <View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>
               <Button
-				  onPress={clearAllkindData}
+				  onPress={clearLoginState}
 				  title="Forgot password?"
 				  color="#515151"
 				  accessibilityLabel="Learn more about this purple button"/> 

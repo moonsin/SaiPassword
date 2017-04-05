@@ -33,7 +33,7 @@ export function savePassword(pw) {
 			password: pw,
 		},
 		//有效期半小时
-		expires: 500 * 3600
+		expires: 500 * 3600 *10
 	})
 }
 export function getLocalPassword(localPassword) {
@@ -64,19 +64,20 @@ export function getLocalPassword(localPassword) {
 }
 
 export function clearLoginState(localPassword) {
-	/*storage.remove({
-	    key:'Login',
+	storage.remove({
+	    key:'loginState',
 	})
-	*/
-	storage.clearMapForKey('Password');
+    //storage.clearMapForKey('Password');
 }
 export function clearAllkindData() {
+    /*
 		for (var idx in IconSource) {
 			function clearOne(type) {
 				return storage.clearMapForKey(type);
 			}
 			clearOne(idx);
 		}
+        */
 	/*storage.getAllDataForKey('Login').then((ret) => {
 		console.log(ret);
 	})
