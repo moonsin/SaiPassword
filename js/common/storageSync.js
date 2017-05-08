@@ -1,6 +1,45 @@
+var ReactNative = require('react-native');
+var {
+    StyleSheet,
+    View,
+    Text,
+    TouchableHighlight,
+    AlertIOS,
+} = ReactNative;
 import {
-    rendeState
+    clearAllkindData,
+    savePassword,
+    rendeState,
+    getLocalPassword,
+    clearLoginState,
+    clearSaiPassword,
 } from '../common/storageApi';
+var CryptoJS = require("crypto-js");
+
+function prompt1(title, resolve) {
+    AlertIOS.prompt(
+        title,
+        'password is expired,please enter it again', [{
+            text: 'OK',
+            onPress: text => {
+                console.log("You entered " + text)
+                getLocalPassword().then((result) => {
+                    if (result.from == 'firstSet') {} else {
+                        if (CryptoJS.SHA256(text).toString() == result.passwordSHA256) {
+                            console.log('true');
+                            savePassword(text);
+                            return text;
+                        } else {
+                            prompt1('wrong password');
+                            console.log('false');
+                        }
+                    }
+                });
+            }
+        }],
+        'secure-text'
+    );
+}
 
 export var sync = {
     loginState(params) {
@@ -95,7 +134,7 @@ export var sync = {
         } = params;
         resolve(false);
     },
-    SaipasswordAccessPassword(params){
+    SaipasswordAccessPassword(params) {
         let {
             resolve
         } = params;

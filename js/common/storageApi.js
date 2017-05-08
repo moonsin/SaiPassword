@@ -26,6 +26,7 @@ export function rendeState() {
 		}
 	})
 }
+
 export function savePassword(pw) {
 	storage.save({
 		key: 'SaipasswordAccessPassword',
@@ -36,6 +37,13 @@ export function savePassword(pw) {
 		expires: 500 * 3600 *10
 	})
 }
+
+export function loadSaiPassword(){
+    return storage.load({
+		key: 'SaipasswordAccessPassword',
+    })
+}
+
 export function getLocalPassword(localPassword) {
 	var readStorageByLoginState = function() {
 		return storage.load({
@@ -64,20 +72,19 @@ export function getLocalPassword(localPassword) {
 }
 
 export function clearLoginState(localPassword) {
-	storage.remove({
+    /*storage.remove({
 	    key:'loginState',
 	})
+    */
     //storage.clearMapForKey('Password');
 }
 export function clearAllkindData() {
-    /*
 		for (var idx in IconSource) {
 			function clearOne(type) {
 				return storage.clearMapForKey(type);
 			}
 			clearOne(idx);
 		}
-        */
 	/*storage.getAllDataForKey('Login').then((ret) => {
 		console.log(ret);
 	})
@@ -85,5 +92,6 @@ export function clearAllkindData() {
 }
 
 export function clearSaiPassword() {
-	storage.clearMapForKey('SaipasswordAccessPassword');
+    //    storage.load({key:'SaipasswordAccessPassword',}).then(ret=>{console.log(ret);})
+    storage.remove({key:'SaipasswordAccessPassword',});
 }
