@@ -7,6 +7,7 @@ import {
     View,
     TabBarIOS,
     Text,
+    DeviceEventEmitter,
 } from 'react-native';
 
 var {
@@ -44,9 +45,10 @@ export class TarBar extends React.Component {
             selectedTab: 'category',
         };
     }
-    _renderContent(pageComponent,title) {
-        return (
-            <NavigatorIOS                     
+    _renderContent(pageComponent, title) {
+        if (title == '类别') {
+            return (
+                <NavigatorIOS                     
 				 style={{flex: 1}}                     
 				 initialRoute={{                            
 	    		 component: pageComponent,                           
@@ -58,7 +60,20 @@ export class TarBar extends React.Component {
                  tintColor="red"
                  barTintColor="#f9f9f9"
               />
-        );
+            );
+        } else {
+            return (
+                <NavigatorIOS
+				 style={{flex: 1}}                     
+				 initialRoute={{                            
+	    		 component: pageComponent,                           
+			 	 title:title ,
+                 }}                   
+                 tintColor="red"
+                 barTintColor="#f9f9f9"
+              />
+            )
+        }
     }
     render() {
         return (
@@ -77,13 +92,17 @@ export class TarBar extends React.Component {
                         this.setState({
                             selectedTab: 'favorite',
                         });
+                        console.log('favorite');
                     }}>
 	              {this._renderContent(FavoritePage,'收藏夹')}
  			  </TabBarIOS.Item>			
               <TabBarIOS.Item
 				  icon={{uri:TabBarIcon.category,scale:2}}
                   title="类别"
-				  onPress={() => {this.setState({selectedTab:'category'})}}
+                  onPress={() => {
+                      this.setState({selectedTab:'category'});
+                      console.log('category'); 
+                  }}
                   selected={this.state.selectedTab === 'category'}
                   selectedIcon={{uri:TabBarIcon.category_filled,scale:2}}
 			  >

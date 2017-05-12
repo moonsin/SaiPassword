@@ -14,32 +14,11 @@ import {
     clearLoginState,
     clearSaiPassword,
 } from '../common/storageApi';
-var CryptoJS = require("crypto-js");
+import {
+    PasswordPrompt,
+} from './passwordPrompt';
 
-function prompt1(title, resolve) {
-    AlertIOS.prompt(
-        title,
-        'password is expired,please enter it again', [{
-            text: 'OK',
-            onPress: text => {
-                console.log("You entered " + text)
-                getLocalPassword().then((result) => {
-                    if (result.from == 'firstSet') {} else {
-                        if (CryptoJS.SHA256(text).toString() == result.passwordSHA256) {
-                            console.log('true');
-                            savePassword(text);
-                            return text;
-                        } else {
-                            prompt1('wrong password');
-                            console.log('false');
-                        }
-                    }
-                });
-            }
-        }],
-        'secure-text'
-    );
-}
+var CryptoJS = require("crypto-js");
 
 export var sync = {
     loginState(params) {
@@ -138,6 +117,8 @@ export var sync = {
         let {
             resolve
         } = params;
-        resolve(false);
+        setTimeout(() => {
+            PasswordPrompt('Enter your password')
+        }, 300);
     }
 };

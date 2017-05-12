@@ -18,6 +18,7 @@ import {
     View,
     Text,
 } from 'react-native';
+import NormalButton from '../common/Button';
 var CryptoJS = require("crypto-js");
 import routes from '../router/Router';
 import IconSource from '../common/IconRequire';
@@ -26,6 +27,7 @@ import {
     loadSaiPassword,
     savePassword,
     getLocalPassword,
+    deleteItem,
 } from '../common/storageApi.js';
 import {
     PasswordPrompt,
@@ -134,17 +136,24 @@ export function clearSubmitValues() {
 }
 var DetailPageNav;
 
-function PageBuilder(pageType, typeCN, editable, navigator, data) {
+function PageBuilder(pageType, typeCN, editable, navigator, data, id, hideDelete) {
+    if (data) {
+        var starState = !!data.star ? 'unstar' : 'star';
+    }
     var content = [];
     var index = 0;
     if (data != null) {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={data.headBarName}/>);
         for (var idx in data) {
-            if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind') {
+            if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind' && idx!='star') {
                 content.push(<InformationBar key={idx+'InformationBar'+index++} groupName={idx} editable={editable} data={data[idx]}/>);
             }
         }
-        content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable} notecontent={data.noteContent} />);
+        content.push(<TextArea key={'NoteTextArea'+index++} navigator={navigator} editable={editable} notecontent={data.noteContent} />);
+        if (!editable && !hideDelete) {
+            content.push(<DetailPageButton key={'StarButton'+index++} text={'★ '+starState} backgroundColor='#007aff' id={id} button='star'  type={pageType} navigator={navigator} data={data}/>);
+            content.push(<DetailPageButton key={'DeleteButton'+index++} text='delete' backgroundColor='red' id={id} button='delete'  type={pageType} navigator={navigator}/>);
+        }
     } else {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} />);
         if (pageType == 'Password') {
@@ -164,7 +173,52 @@ function PageBuilder(pageType, typeCN, editable, navigator, data) {
 
     return content;
 }
-
+class DetailPageButton extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            //中文
+            disabled: false,
+            text: this.props.text,
+            backgroundColor: this.props.backgroundColor,
+        };
+    };
+    press(text) {
+        if (text == 'delete') {
+            deleteItem(this.props.type, this.props.id);
+            DeviceEventEmitter.emit('ItemDelete');
+            this.props.navigator.pop();
+        }
+        if (text == 'star') {
+            var data = this.props.data;
+            data.star = !data.star;
+            this.setState({
+                disabled: true,
+            })
+            storage.save({
+                key: this.props.type, // 注意:请不要在key中使用_下划线符号!
+                id: this.props.id,
+                rawData: data,
+                expires: null
+            }).then(() => {
+                DeviceEventEmitter.emit('starChange');
+            });
+            setTimeout(() => {
+                this.setState({
+                    disabled: false,
+                    text: data.star ? 'unstar' : 'star',
+                })
+            }, 300)
+        }
+    }
+    render() {
+        return (
+            <View style={{marginTop:20,flexDirection: 'row',justifyContent: 'center',}} >
+                   <NormalButton text={this.state.text} backgroundColor={this.state.backgroundColor} onpress={()=>{this.press(this.props.button);}} disabled={this.state.disabled}  />
+             </View>
+        )
+    }
+}
 export class DetailPage extends React.Component {
     constructor(props) {
         super(props);
@@ -199,6 +253,7 @@ export class DetailPage extends React.Component {
         this.getNewPassword.remove();
     };
     componentDidMount() {
+        /*
         var getIfPassword = async function() {
             var ifPassword = await loadSaiPassword();
             return ifPassword;
@@ -211,6 +266,7 @@ export class DetailPage extends React.Component {
                 }, 300);
             }
         })
+        */
     }
     componentWillMount() {
         this.subCript = DeviceEventEmitter.addListener('EditItemDone', () => {
@@ -219,13 +275,14 @@ export class DetailPage extends React.Component {
         this.getNewPassword = DeviceEventEmitter.addListener('setSaiPassword', () => {
             this.props.navigator.pop();
         })
+
         function setStateContent(type, id, editable) {
             if (editable == undefined) {
                 var editable = this.props.editable;
             }
             this.getLocalData(type, id).then((result) => {
                 this.setState({
-                    content: PageBuilder(this.props.type, this.state.type, editable, this.props.navigator, result),
+                    content: PageBuilder(this.props.type, this.state.type, editable, this.props.navigator, result, this.props.id, this.props.hideDelete),
                 })
                 return result;
             })
@@ -508,7 +565,6 @@ class SingleTimelayer extends React.Component {
         var date = this.props.data || new Date();
         date = new Date(date);
         date = date.toLocaleDateString();
-        console.log(this.props.editable);
         return (
             <View>
 			<Text style={styles.singleLayerInput_title}>{this.props.title}</Text>

@@ -7,8 +7,9 @@ import {
 } from '../category/naVapi';
 import {
     loadSaiPassword,
-    savePassword,
-    getLocalPassword,
+    getLocalDataKind,
+    getLocalAllKindData,
+    getLocalKindAllData,
 } from './storageApi.js';
 import {
     AlertIOS,
@@ -34,81 +35,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#F4F4F4',
     },
 });
-
-
-
-function getLocalDataKind(AllKindData) {
-    var existData = [];
-    var localKindData = {};
-    for (var idx in AllKindData) {
-        existData.push({
-            key: idx,
-            id: '1',
-        });
-    }
-    var getLocalKind = function() {
-        return storage.getBatchData(existData)
-    }
-    var getIfKind = async function() {
-        var existArray = await getLocalKind();
-        existArray.forEach(function(item) {
-            if (item != false) {
-                localKindData[item.pageKind] = true;
-            }
-        })
-        return localKindData;
-    }
-    return getIfKind();
-}
-
-function getLocalAllKindData(AllKindData) {
-    var allData = {};
-    var allDataFormat = {};
-    var getKindDataByType = function(type) {
-        return storage.getAllDataForKey(type);
-    }
-    var getData = async function(type) {
-        for (var idx in AllKindData) {
-            var data = await getKindDataByType(idx);
-            if (data != '') {
-                allData[idx] = data;
-            }
-        }
-        for (var idx in allData) {
-            allData[idx].forEach(function(item, indexNum) {
-                allDataFormat[item.headBarName] = {};
-                //深度赋值
-                for (var index in item) {
-                    allDataFormat[item.headBarName][index] = item[index];
-                }
-                allDataFormat[item.headBarName].id = indexNum + 1;
-            })
-        }
-        return allDataFormat;
-    }
-    return getData();
-}
-
-function getLocalKindAllData(type) {
-    var getKindDataByType = function(type) {
-        return storage.getAllDataForKey(type);
-    }
-    var getData = async function() {
-        var data = await getKindDataByType(type);
-        var formatData = {};
-        data.forEach(function(item, index) {
-            formatData[item.headBarName] = {};
-            //深度赋值
-            for (var idx in item) {
-                formatData[item.headBarName][idx] = item[idx];
-            }
-            formatData[item.headBarName].id = index + 1;
-        });
-        return formatData;
-    }
-    return getData();
-}
-
 export class ItemScrollView extends Component {
     constructor(props) {
         super(props);
@@ -130,9 +56,20 @@ export class ItemScrollView extends Component {
                 id = data[idx].id
                 addview.push(<IconItem key={index++} id={id} navigator={this.props.navigator} title={name[0]} type={type} source={IconSource[type]} fromPage={page} />);
             }
-        } else {
+        } else if (page != 'FavoritePage') {
+            //用来渲染data里的种类项目
             for (var idx in data) {
                 addview.push(<IconItem key={index++} navigator={this.props.navigator} title={idx} type={idx} source={IconSource[idx]} fromPage={page} />);
+            }
+        }
+        if (page == 'FavoritePage') {
+            for (var idx in data) {
+                if (data[idx].star) {
+                    var name = idx.split('$AddItemTime$');
+                    type = data[idx].pageKind;
+                    id = data[idx].id
+                    addview.push(<IconItem key={index++} id={id} navigator={this.props.navigator} title={name[0]} type={type} source={IconSource[type]} fromPage={page} />);
+                }
             }
         }
         for (; index < 12; index++) {
@@ -143,6 +80,8 @@ export class ItemScrollView extends Component {
     componentWillUnmount() {
         this.getAddItemType.remove();
         this.subscript.remove();
+        this.itemDelete.remove();
+        this.starChange.remove();
     };
     componentDidMount() {
         var getIfPassword = async function() {
@@ -178,14 +117,28 @@ export class ItemScrollView extends Component {
                         })
                     });
                 }
+            } else if (this.props.page == 'FavoritePage') {
+                getLocalAllKindData(IconSource).then((result) => {
+                    this.setState({
+                        viewModule: this.makeModule(result, this.props.page, this.props.type),
+                    })
+                });
             }
         }
         var makeAll = makeAllMoudule.bind(this);
+        this.itemDelete = DeviceEventEmitter.addListener('ItemDelete', () => {
+            makeAll();
+        });
+        this.starChange = DeviceEventEmitter.addListener('starChange', () => {
+            makeAll();
+        });
         this.subscript = DeviceEventEmitter.addListener('EditItemDone', (value) => {
             makeAll();
         });
         this.getAddItemType = DeviceEventEmitter.addListener('AddItemPageChooseItem', (value) => {
-            AddItemToDetailPage(value.type, null, this.props.navigator);
+            if (this.props.page != 'FavoritePage') {
+                AddItemToDetailPage(value.type, null, this.props.navigator);
+            }
         });
         makeAll();
     }
@@ -207,7 +160,7 @@ class IconItem extends Component {
                 fromPage: 'CategoryPage',
             };
             this.props.navigator.push(routes[6]);
-        } else if (this.props.fromPage == 'KindListPage') {
+        } else if (this.props.fromPage == 'KindListPage' || this.props.fromPage == 'FavoritePage') {
             getIntoDetailPage(this.props.type, this.props.id, this.props.navigator);
         }
     }

@@ -27,9 +27,10 @@ export default class NormalButton extends React.Component {
             text,
             backgroundColor,
             onpress,
+            disabled,
         } = this.props;
         return (
-            <TouchableOpacity style={[styles.Button,{backgroundColor:backgroundColor}]} onPress={onpress}>
+            <TouchableOpacity style={[styles.Button,{backgroundColor:backgroundColor}]} onPress={onpress} disabled={disabled} >
                     <Text style={styles.ButtonText}>{text}</Text>
                 </TouchableOpacity>
         )

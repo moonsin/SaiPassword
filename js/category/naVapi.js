@@ -14,6 +14,7 @@ export function AddItemDetailPagetoDetail(type, id, navigator) {
         type: type,
         id: id,
         editable: false,
+        hideDelete:true,
     };
     routes[4].rightButtonTitle = '编辑';
     routes[4].onRightButtonPress = () => {
