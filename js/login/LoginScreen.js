@@ -23,6 +23,7 @@ import {
     getLocalPassword,
     clearLoginState,
     clearSaiPassword,
+    saveServerData,
 } from '../common/storageApi';
 var CryptoJS = require("crypto-js");
 const styles = StyleSheet.create({
@@ -46,11 +47,13 @@ export class LoginScreen extends React.Component {
             ifLogin: null,
             passwordInput: null,
             userIdInput: null,
+            keyInput: null,
             firstSignIn: false,
         };
     }
     componentWillUnmount() {
         this.subscription.remove();
+        this.logOut.remove();
         AppState.removeEventListener('change');
     };
     componentWillMount() {
@@ -84,6 +87,11 @@ export class LoginScreen extends React.Component {
             } else {
                 if (CryptoJS.SHA256(this.state.passwordInput).toString() == result.passwordSHA256) {
                     savePassword(this.state.passwordInput);
+                    this.setState({
+                        userIdInput: null,
+                        keyInput: null,
+                        passwordInput: null,
+                    })
                     if (this.props.test) {
                         this.props.navigator.pop();
                     } else {
@@ -103,7 +111,72 @@ export class LoginScreen extends React.Component {
     }
     firstSignIn() {
         console.log(this.state.userIdInput);
+        console.log(this.state.keyInput);
         console.log(this.state.passwordInput);
+        if (this.state.userIdInput == null || this.state.keyInput == null || this.state.passwordInput == null) {
+            alert('不能为空');
+        } else {
+            //password: CryptoJS.AES.encrypt(this.state.passwordInput, this.state.keyInput).toString(),
+            var updata = {
+                userId: this.state.userIdInput,
+            }
+            fetch(ipAdress + '/firstLogin', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updata),
+            }).then((res) => {
+                return res.json();
+            }).then((data) => {
+                if (data.password) {
+                    if (this.state.passwordInput == CryptoJS.AES.decrypt(data.password, this.state.keyInput).toString(CryptoJS.enc.Utf8)) {
+                        var updata = {
+                            userId: this.state.userIdInput,
+                            password: data.password,
+                        }
+                        fetch(ipAdress + '/getData', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(updata),
+                        }).then((res) => {
+                            return res.json();
+                        }).then((data) => {
+                            console.log(data);
+                            storage.save({
+                                key: 'loginState', // 注意:请不要在key中使用_下划线符号!
+                                rawData: {
+                                    from: 'login',
+                                    userid: this.state.userIdInput,
+                                    passwordSHA256: CryptoJS.SHA256(this.state.passwordInput).toString(),
+                                },
+                                expires: null
+                            });
+                            savePassword(this.state.passwordInput);
+                            saveServerData(data.data,this.state.passwordInput);
+                            this.setState({
+                                userIdInput: null,
+                                keyInput: null,
+                                passwordInput: null,
+                            })
+                            if (this.props.test) {
+                                this.props.navigator.pop();
+                            } else {
+                                this.props.navigator.push(routes[2]);
+                            }
+                        })
+                    } else {
+                        alert('key/password错误');
+                    }
+                } else {
+                    alert('用户不存在');
+                }
+            });
+        }
     }
     render() {
         if (this.state.firstSignIn == true) {
@@ -129,6 +202,17 @@ export class LoginScreen extends React.Component {
 								value={this.state.userIdInput}
       						/> 
             			</Image>
+                    <Image source={require('../common/img/txt-input-copy.png')} style={{flexDirection:'row',marginTop:10}}>
+            			<Image source={require('../common/img/key-icon.png')} style={{width:20,height:20,marginLeft:10,marginTop:8}}></Image>
+							 <TextInput
+								style={{height: 26, width:160,marginLeft:10,marginTop:7}}
+								secureTextEntry={true}
+								onChangeText={(text) => this.setState({
+									keyInput:text
+								})}
+								value={this.state.keyInput}
+      						/> 
+            		</Image>
                 	<Image source={require('../common/img/txt-input-copy.png')} style={{flexDirection:'row',marginTop:10}}>
             			<Image source={require('../common/img/lock-icon.png')} style={{marginLeft:10,marginTop:8}}></Image>
 							 <TextInput
@@ -142,7 +226,7 @@ export class LoginScreen extends React.Component {
             		</Image>
                 </View> 
                 
-                <View style={{flexDirection: 'row',justifyContent: 'center',marginTop:-100}} >
+                <View style={{flexDirection: 'row',justifyContent: 'center',marginTop:0}} >
                     <NormalButton text='sign in' backgroundColor='#525252' onpress={this.firstSignIn.bind(this)} />
                 </View>
                 <View style={{justifyContent:'flex-end',flex:1,marginBottom:24}}>

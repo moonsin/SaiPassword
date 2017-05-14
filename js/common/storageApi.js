@@ -72,15 +72,15 @@ export function getLocalPassword(localPassword) {
     return getStorageByPassword();
 
 }
-export function logout(){
+export function logout() {
     clearLoginState();
     clearAllkindData();
     clearSaiPassword();
 }
 export function clearLoginState(localPassword) {
     storage.remove({
-	    key:'loginState',
-	})
+        key: 'loginState',
+    })
     //storage.clearMapForKey('Password');
 }
 export function clearAllkindData() {
@@ -179,4 +179,60 @@ export function getLocalKindAllData(type) {
         return formatData;
     }
     return getData();
+}
+export function getAllDataByKind(AllKindData) {
+    var allData = {};
+    var allDataFormat = {};
+    var getKindDataByType = function(type) {
+        return storage.getAllDataForKey(type);
+    }
+    var getData = async function(type) {
+        for (var idx in AllKindData) {
+            var data = await getKindDataByType(idx);
+            if (data != '') {
+                allData[idx] = data;
+            }
+        }
+        return allData;
+    }
+    return getData();
+}
+export function saveServerData(data, saiPass) {
+    var decryptedData = {};
+    var data = JSON.parse(data);
+    _decryptData(data, saiPass);
+    var deData = decryptedData;
+    for (var idx in deData) {
+        deData[idx].forEach(function(item, indexNum) {
+            console.log(idx);
+            storage.save({
+                key: idx, // 注意:请不要在key中使用_下划线符号!
+                id: indexNum + 1,
+                rawData: item,
+                expires: null
+            })
+        })
+    }
+
+    function _decryptData(data, saiPass) {
+        console.log(data);
+        for (var idx in data) {
+            decryptedData[idx] = [];
+            data[idx].forEach(function(item, index) {
+                decryptedData[idx][index] = {};
+                decryptObject(item, saiPass, decryptedData[idx][index])
+            })
+        }
+    }
+
+    function decryptObject(item, saiPass, decryptDATA) {
+        for (var idx in item) {
+            if (typeof(item[idx]) == 'string') {
+                decryptDATA[idx] = CryptoJS.AES.decrypt(item[idx], saiPass).toString(CryptoJS.enc.Utf8);
+            } else {
+                decryptDATA[idx] = {};
+                decryptObject(item[idx], saiPass, decryptDATA[idx]);
+            }
+        }
+    }
 }

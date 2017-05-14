@@ -171,7 +171,7 @@ export class SignUpPage extends React.Component {
                     storage.save({
                         key: 'loginState', // 注意:请不要在key中使用_下划线符号!
                         rawData: {
-                            from: 'some other site',
+                            from: 'signUp',
                             userid: value.userId,
                             passwordSHA256: CryptoJS.SHA256(value.password).toString(),
                         },
