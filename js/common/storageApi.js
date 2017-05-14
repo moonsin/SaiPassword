@@ -8,7 +8,6 @@ export function rendeState() {
         //storage.remove({
         //  key: 'loginState'  
         //})
-
         this.setState({
             ifLogin: !!ret.userid
         })
@@ -26,7 +25,11 @@ export function rendeState() {
         }
     })
 }
-
+export function readUserId() {
+    return storage.load({
+        key: 'loginState',
+    })
+}
 export function savePassword(pw) {
     storage.save({
         key: 'SaipasswordAccessPassword',
@@ -69,12 +72,15 @@ export function getLocalPassword(localPassword) {
     return getStorageByPassword();
 
 }
-
+export function logout(){
+    clearLoginState();
+    clearAllkindData();
+    clearSaiPassword();
+}
 export function clearLoginState(localPassword) {
-    /*storage.remove({
+    storage.remove({
 	    key:'loginState',
 	})
-    */
     //storage.clearMapForKey('Password');
 }
 export function clearAllkindData() {

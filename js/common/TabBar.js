@@ -45,6 +45,9 @@ export class TarBar extends React.Component {
             selectedTab: 'category',
         };
     }
+    componentWillUnmount() {
+        this.subCript.remove();
+    };
     _renderContent(pageComponent, title) {
         if (title == '类别') {
             return (
@@ -62,6 +65,9 @@ export class TarBar extends React.Component {
               />
             );
         } else {
+            this.subCript = DeviceEventEmitter.addListener('logout',()=>{
+                this.props.navigator.pop(); 
+            })
             return (
                 <NavigatorIOS
 				 style={{flex: 1}}                     
@@ -92,7 +98,6 @@ export class TarBar extends React.Component {
                         this.setState({
                             selectedTab: 'favorite',
                         });
-                        console.log('favorite');
                     }}>
 	              {this._renderContent(FavoritePage,'收藏夹')}
  			  </TabBarIOS.Item>			

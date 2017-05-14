@@ -168,7 +168,6 @@ export class SignUpPage extends React.Component {
                 var userExist = data.userExist
                 if (!userExist) {
                     alert('用户创建成功');
-                    console.log()
                     storage.save({
                         key: 'loginState', // 注意:请不要在key中使用_下划线符号!
                         rawData: {

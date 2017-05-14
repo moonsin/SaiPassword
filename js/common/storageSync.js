@@ -38,6 +38,7 @@ export var sync = {
             expires: null
         });
         resolve({
+            from : 'firstSet',
             userid: null
         });
     },
