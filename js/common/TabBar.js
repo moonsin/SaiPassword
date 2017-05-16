@@ -65,8 +65,8 @@ export class TarBar extends React.Component {
               />
             );
         } else {
-            this.subCript = DeviceEventEmitter.addListener('logout',()=>{
-                this.props.navigator.pop(); 
+            this.subCript = DeviceEventEmitter.addListener('logout', () => {
+                this.props.navigator.pop();
             })
             return (
                 <NavigatorIOS
@@ -95,6 +95,7 @@ export class TarBar extends React.Component {
                     selected={this.state.selectedTab === 'favorite'}
                     selectedIcon={{uri:TabBarIcon.favorite_filled,scale:2}}
                     onPress={() => {
+                        DeviceEventEmitter.emit('TabBarChanged');
                         this.setState({
                             selectedTab: 'favorite',
                         });
@@ -105,6 +106,7 @@ export class TarBar extends React.Component {
 				  icon={{uri:TabBarIcon.category,scale:2}}
                   title="类别"
                   onPress={() => {
+                        DeviceEventEmitter.emit('TabBarChanged');
                       this.setState({selectedTab:'category'});
                       console.log('category'); 
                   }}
@@ -114,18 +116,11 @@ export class TarBar extends React.Component {
 	              {this._renderContent(CategoryPage,'类别')}
                   </TabBarIOS.Item>
               <TabBarIOS.Item
-				  icon={{uri:TabBarIcon.arrange,scale:2}}
-                  title="整理"
-				  onPress={() => {this.setState({selectedTab:'arrange'})}}
-                  selected={this.state.selectedTab === 'arrange'}
-                  selectedIcon={{uri:TabBarIcon.arrange_filled,scale:2}}
-              >
-	              {this._renderContent(ArrangePage,'整理')}
-              </TabBarIOS.Item>
-              <TabBarIOS.Item
 				  icon={{uri:TabBarIcon.config,scale:2}}
                   title="设置"
-			      onPress={() => {this.setState({selectedTab:'config'})}}
+                  onPress={() => {
+                      DeviceEventEmitter.emit('TabBarChanged');
+                      this.setState({selectedTab:'config'})}}
                   selected={this.state.selectedTab === 'config'}
                   selectedIcon={{uri:TabBarIcon.config_filled,scale:2}}
               >

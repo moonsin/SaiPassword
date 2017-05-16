@@ -145,7 +145,7 @@ function PageBuilder(pageType, typeCN, editable, navigator, data, id, hideDelete
     if (data != null) {
         content.push(<HeadBar key={'HeadBar'} typeCN={typeCN} type={pageType} editable={editable} headBarName={data.headBarName}/>);
         for (var idx in data) {
-            if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind' && idx!='star') {
+            if (idx != 'headBarName' && idx != 'noteContent' && idx != 'pageKind' && idx != 'star') {
                 content.push(<InformationBar key={idx+'InformationBar'+index++} groupName={idx} editable={editable} data={data[idx]}/>);
             }
         }
@@ -170,7 +170,6 @@ function PageBuilder(pageType, typeCN, editable, navigator, data, id, hideDelete
         }
         content.push(<TextArea key={'NoteTextArea'+index} navigator={navigator} editable={editable}  />);
     }
-
     return content;
 }
 class DetailPageButton extends React.Component {
@@ -251,29 +250,24 @@ export class DetailPage extends React.Component {
     componentWillUnmount() {
         this.subCript.remove();
         this.getNewPassword.remove();
+        this.TabBarChanged.remove();
     };
-    componentDidMount() {
-        /*
-        var getIfPassword = async function() {
-            var ifPassword = await loadSaiPassword();
-            return ifPassword;
-        }
-        var ifPassword = getIfPassword();
-        ifPassword.then(result => {
-            if (!result) {
-                setTimeout(() => {
-                    PasswordPrompt('Enter your password')
-                }, 300);
-            }
-        })
-        */
-    }
+    componentDidMount() {}
     componentWillMount() {
         this.subCript = DeviceEventEmitter.addListener('EditItemDone', () => {
             setContent(this.props.type, this.props.id, false);
         })
         this.getNewPassword = DeviceEventEmitter.addListener('setSaiPassword', () => {
             this.props.navigator.pop();
+        })
+        this.TabBarChanged = DeviceEventEmitter.addListener('TabBarChanged', () => {
+            if (this.props.editable) {
+                noteReset();
+                clearSubmitValues();
+                changePreViewAndPopToDetaiPage(this.props.type, this.props.id, this.props.navigator);
+            } else {
+                this.props.navigator.pop();
+            }
         })
 
         function setStateContent(type, id, editable) {
@@ -289,7 +283,7 @@ export class DetailPage extends React.Component {
         }
         var setContent = setStateContent.bind(this);
         //set submitValue
-        if (this.props.id) {
+        if (this.props.id && !!this.props.editable) {
             storage.load({
                 key: this.props.type,
                 id: this.props.id
@@ -304,6 +298,7 @@ export class DetailPage extends React.Component {
         pageKind = this.props.type;
         DetailPageNav = this.props.navigator;
         setContent(this.props.type, this.props.id);
+
     }
     render() {
         return (
@@ -488,7 +483,6 @@ class InformationBar extends React.Component {
             content.push(<SingleLayerInput title='first name' default="姓氏"  key={'IdentificationComponent'+index++} groupName='Identification' type='firstName' editable={this.props.editable} data={data.firstName} />)
             content.push(<SingleLayerInput title='last name' default="名字" key={'IdentificationComponent'+index++} groupName='Identification' type='lastName' editable={this.props.editable} data={data.lastName} />)
             content.push(<SingleLayerInput title='sex' default="性别" key={'IdentificationComponent'+index++} groupName='Identification' type='sex' editable={this.props.editable} data={data.sex} />)
-            //content.push(<SingleLayerInput title='birth date' default="生日" key={'IdentificationComponent'+index++} groupName='Identification' type='birthDate' editable={this.props.editable} data={data.birthDate} />)
             content.push(<SingleTimelayer  title='birth date' key={'IdentificationComponent'+index++} groupName='Identification' type='birthDate' editable={this.props.editable} data={data.birthDate}/>);
             content.push(<SingleLayerInput title='occupation' default="职业" key={'IdentificationComponent'+index++} groupName='Identification' type='occupation' editable={this.props.editable} data={data.occupation} />)
             content.push(<SingleLayerInput title='company' default="公司" key={'IdentificationComponent'+index++} groupName='Identification' type='company' editable={this.props.editable} data={data.company} />)
@@ -550,17 +544,6 @@ class SingleTimelayer extends React.Component {
             })
         }
     }
-
-    componentDidUpdate() {
-        /*
-        if ((Date.parse(new Date(this.props.data)) != Date.parse(this.state.date)) && this.props.editable != true) {
-            this.setState({
-                date: new Date(this.props.data),
-            })
-        }
-        */
-    }
-
     render() {
         var date = this.props.data || new Date();
         date = new Date(date);
@@ -619,18 +602,20 @@ class SingleLayerInput extends React.Component {
 
     componentDidMount() {
         this.subScript = DeviceEventEmitter.addListener('EditItemDone', () => {
-            this.getSaiPassword().then((result) => {
-                var pass = '';
-                if (this.props.data) {
-                    pass = CryptoJS.AES.decrypt(this.props.data, result.password).toString(CryptoJS.enc.Utf8);
-                }
-                this.setState({
-                    value: pass
+            if (this.props.type == 'Password') {
+                this.getSaiPassword().then((result) => {
+                    var pass = '';
+                    if (this.props.data) {
+                        pass = CryptoJS.AES.decrypt(this.props.data, result.password).toString(CryptoJS.enc.Utf8);
+                    }
+                    this.setState({
+                        value: pass
+                    })
+                    if (this.props.changeText) {
+                        this.props.changeText(pass);
+                    }
                 })
-                if (this.props.changeText) {
-                    this.props.changeText(pass);
-                }
-            })
+            }
         })
     }
     componentWillMount() {

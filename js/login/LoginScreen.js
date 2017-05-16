@@ -54,7 +54,7 @@ export class LoginScreen extends React.Component {
     componentWillUnmount() {
         this.subscription.remove();
         this.logOut.remove();
-        AppState.removeEventListener('change');
+        //AppState.removeEventListener('change');
     };
     componentWillMount() {
         var rendeByState = rendeState.bind(this);

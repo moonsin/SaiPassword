@@ -20,13 +20,13 @@ var storage = new Storage({
 	defaultExpires: null,
 
 	// 读写时在内存中缓存数据。默认启用。
-	enableCache: true,
+	enableCache: false,
 
 	// 如果storage中没有相应数据，或数据已过期，
 	// 则会调用相应的sync方法，无缝返回最新数据。
 	sync:sync 
 })
-global.ipAdress ='http://210.41.102.213:8888'; 
+global.ipAdress ='http://139.199.224.129:8888'; 
 global.storage = storage;
 
 var {
